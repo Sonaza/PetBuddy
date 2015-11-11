@@ -1,0 +1,357 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<CheckButton name="PetBuddyAutoHealButton" frameStrata="MEDIUM" inherits="UICheckButtonTemplate" parent="GossipFrame" hidden="true">
+		<Anchors>
+			<Anchor point="TOPRIGHT" parent="GossipFrame" relativePoint="TOPRIGHT" x="-80" y="-27"/>
+		</Anchors>
+		<Scripts>
+			<OnShow>
+				AutoHealButton_OnShow(self);
+				self.text:SetText("Auto Heal Pets")
+				self:SetFrameLevel(GossipFrame:GetFrameLevel()+2);
+			</OnShow>
+			<OnClick>
+				AutoHealButton_OnClick(self)
+			</OnClick>
+		</Scripts>
+	</CheckButton>
+	
+	<Button name="PetBuddyFrame" parent="UIParent" frameStrata="MEDIUM" movable="true" toplevel="true" clampedToScreen="true">
+		<Size x="208" y="208"/>
+		<Anchors>
+			<Anchor point="CENTER" x="0" y="0"/>
+		</Anchors>
+		<Frames>
+			<Frame name="$parentTitle">
+				<Size>
+					<AbsDimension x="208" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent" x="0" y="0" />
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK" textureSubLevel="1">
+						<FontString name="$parentTitleText" inherits="PetBuddyFontNormal" justifyH="LEFT" justifyV="BOTTOM" parentKey="titleText" text="Pet Buddy">
+							<Size x="100" y="24"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeTo="$parent" x="2" y="5"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button parentKey="closeButton" inherits="SecureHandlerClickTemplate">
+						<Size x="32" y="32"/>
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="3" y="2"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetAttribute("_onclick", [=[
+									local frame = self:GetFrameRef("PetBuddyFrame");
+									frame:Hide();
+								]=]);
+								SecureHandlerSetFrameRef(self, "PetBuddyFrame", self:GetParent():GetParent());
+							</OnLoad>
+						</Scripts>
+						<NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
+						<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
+						<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+					</Button>
+					<PlayerModel name="$parentPepeFrame" parentKey="pepeFrame">
+						<Size x="50" y="50"/>
+						<Anchors>
+							<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.closeButton" x="1" y="-21"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:EnableMouse(false);
+								self:SetCreature(86470);
+							 	self:SetPosition(-0.5, 0, 0);
+							 	self:SetRotation(-0.35);
+							</OnLoad>
+						</Scripts>
+					</PlayerModel>
+					<Frame name="$parentPetCharms">
+						<Size x="46" y="20"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.closeButton" relativePoint="LEFT" x="0" y="0"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture file="Interface\ICONS\ACHIEVEMENT_GUILDPERK_HONORABLEMENTION">
+									<Size x="14" y="14"/>
+									<Anchors>
+										<Anchor point="RIGHT"/>
+									</Anchors>
+									<TexCoords left="0.055" right="0.945" top="0.055" bottom="0.945"/>
+								</Texture>
+								<FontString name="$parentText" inherits="PetBuddyFontNormal" justifyH="RIGHT" justifyV="CENTER" parentKey="text">
+									<Size x="46" y="20"/>
+									<Anchors>
+										<Anchor point="RIGHT" x="-16" y="-1"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self:RegisterEvent("PLAYER_ENTERING_WORLD");
+								self:RegisterEvent("BAG_UPDATE_DELAYED");
+							</OnLoad>
+							<OnShow>
+								self:RegisterEvent("PLAYER_ENTERING_WORLD");
+								self:RegisterEvent("BAG_UPDATE_DELAYED");
+							</OnShow>
+							<OnHide>
+								self:UnregisterEvent("PLAYER_ENTERING_WORLD");
+								self:UnregisterEvent("BAG_UPDATE_DELAYED");
+							</OnHide>
+							<OnEvent>
+								PetBuddyFrame_UpdatePetCharms(self, event, ...);
+							</OnEvent>
+							<OnEnter>
+								GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+								GameTooltip:SetItemByID(116415);
+								GameTooltip:Show();
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+							</OnLeave>
+						</Scripts>
+					</Frame>
+				</Frames>
+			</Frame>
+			
+			<Button name="$parentPet1" parentKey="pet1" inherits="PetBuddyPetFrameTemplate" id="1">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parent" x="0" y="-24"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentPet2" parentKey="pet2" inherits="PetBuddyPetFrameTemplate" id="2">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentPet1" relativePoint="BOTTOM" x="0" y="-3"/>
+				</Anchors>
+			</Button>
+			<Button name="$parentPet3" parentKey="pet3" inherits="PetBuddyPetFrameTemplate" id="3">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parentPet2" relativePoint="BOTTOM" x="0" y="-3"/>
+				</Anchors>
+			</Button>
+			
+			<Frame name="$parentSpellSelect" frameStrata="DIALOG" parentKey="spellSelect" hidden="true">
+				<Size x="28" y="69"/>	
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="BgEnd" file="Interface\Buttons\ActionBarFlyoutButton">
+							<Size x="37" y="22"/>	
+							<Anchors>
+								<Anchor point="BOTTOM"/>
+							</Anchors>
+							<TexCoords left="0.01562500" right="0.59375000" top="0.91406250" bottom="0.74218750"/>	
+						</Texture>
+						<Texture parentKey="BgTiled" file="Interface\Buttons\ActionBarFlyoutButton-FlyoutMid" vertTile="true">
+							<Size x="37" y="32"/>
+							<Anchors>
+								<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="0"/>
+								<Anchor point="BOTTOM" relativeKey="$parent.BgEnd" relativePoint="TOP" x="0" y="0"/>
+							</Anchors>
+							<TexCoords left="0" right="0.578125" top="0" bottom="1"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Frames>
+					<CheckButton name="$parentSpell1" inherits="PetSpellSelectButtonTemplate" id="1" parentKey="Spell1">
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent" relativePoint="TOP" x="0" y="-5"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parentSpell2" inherits="PetSpellSelectButtonTemplate" id="2" parentKey="Spell2">
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent.Spell1" relativePoint="BOTTOM" x="0" y="-4"/>
+						</Anchors>
+					</CheckButton>
+ 				</Frames>
+				<Scripts>
+					<OnShow>
+						self:SetFrameLevel(self:GetFrameLevel() + 5);
+					</OnShow>
+					<OnHide>
+						PetJournalPrimaryAbilityTooltip:Hide();
+						PetJournalSecondaryAbilityTooltip:Hide();
+					</OnHide>
+				</Scripts>
+			</Frame>
+			
+			<Frame name="$parentButtons" parentKey="buttons">
+				<Size x="208" y="36"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentPet3" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Frames>
+					<CheckButton parentKey="itemButton1" inherits="PetBuddyButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT" x="-6" y="-6"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="itemButton2" inherits="PetBuddyButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.itemButton1" relativePoint="LEFT" x="-6" y="0"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="itemButton3" inherits="PetBuddyButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.itemButton2" relativePoint="LEFT" x="-6" y="0"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="itemButton4" inherits="PetBuddyButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.itemButton3" relativePoint="LEFT" x="-6" y="0"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="itemButton5" inherits="PetBuddyButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.itemButton4" relativePoint="LEFT" x="-6" y="0"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton parentKey="itemButton6" inherits="PetBuddyButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.itemButton5" relativePoint="LEFT" x="-6" y="0"/>
+						</Anchors>
+					</CheckButton>
+					
+					<Frame name="PetBuddyFlyout" inherits="PetBuddyFlyoutTemplate" hidden="true">
+						<Size x="36" y="720"/>
+						<Anchors>
+							<Anchor point="TOP" relativePoint="BOTTOM" />
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								tinsert(UISpecialFrames, self:GetName());
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.812);
+						PetBuddyFrameButtons_OnShow(self);
+					</OnLoad>
+					<OnShow>
+						PetBuddyFrameButtons_OnShow(self);
+					</OnShow>
+					<OnHide>
+						PetBuddyFrameButtons_OnHide(self);
+					</OnHide>
+					<OnEvent>
+						PetBuddyFrameButtons_OnEvent(self, event, ...);
+					</OnEvent>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentLoadouts" parentKey="loadouts" hidden="true">
+				<Size x="208" y="36"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentPet3" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parentToggleButton" parentKey="toggleButton" inherits="PetBuddyButtonTemplate">
+						<Size x="36" y="36"/>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="-10" y="-6"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetScale(0.6);
+								PetBuddyLoadoutsToggleButton_OnLoad(self);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentSaveButton" parentKey="saveButton" inherits="PetBuddyButtonTemplate">
+						<Size x="36" y="36"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.toggleButton" relativePoint="LEFT" x="-8" y="0"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetScale(0.6);
+								PetBuddyLoadoutsSaveButton_OnLoad(self);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+					
+					<EditBox name="$parentSearchBox" inherits="SearchBoxTemplate" parentKey="searchBox" autoFocus="false" letters="38">
+						<Size x="138" y="20"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="8" y="-5"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								SearchBoxTemplate_OnLoad(self);
+								self.Instructions:SetText("Search Loadouts")
+							</OnLoad>
+							<OnTextChanged function="PetBuddyFrameLoadouts_OnSearchTextChanged"/>
+							<OnEscapePressed>
+								self:SetText("");
+								self:ClearFocus();
+								PetBuddyFrameLoadoutsScrollFrame_ToggleVisibility(false);
+							</OnEscapePressed>
+						</Scripts>
+					</EditBox>
+					
+					<ScrollFrame name="$parentScrollFrame" parentKey="scrollFrame" inherits="HybridScrollFrameTemplate" hidden="true">
+						<Size x="208" y="138"/>
+						<Anchors>
+							<Anchor point="TOP" relativeTo="$parent" x="0" y="-31"/>
+						</Anchors>
+						<Frames>
+							<Slider name="$parentScrollBar" inherits="PetBuddyLoadoutsScrollBarTemplate" parentKey="scrollBar" hidden="true">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-4" y="6"/>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="-4" y="-6"/>
+								</Anchors>
+							</Slider>
+						</Frames>
+						<Scripts>
+							<OnLoad>
+								tinsert(UISpecialFrames, self:GetName());
+							</OnLoad>
+							<OnHide>
+								self:GetParent().searchBox:SetText("");
+								PetBuddyFrameLoadoutsScrollFrame_ToggleVisibility(false);
+							</OnHide>
+						</Scripts>
+					</ScrollFrame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						PetBuddyFrameLoadouts_OnLoad(self);
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:EnableMouseWheel(true);
+				self:RegisterForClicks("RightButtonUp");
+			</OnLoad>
+			<OnClick>
+				PetBuddyFrame_OnClick(self, button);
+			</OnClick>
+			<OnMouseWheel>
+				PetBuddyFrame_OnMouseWheel(self, delta);
+			</OnMouseWheel>
+			<OnMouseDown>
+				PetBuddyFrame_StartMoving();
+			</OnMouseDown>
+			<OnMouseUp>
+				PetBuddyFrame_StopMoving();
+			</OnMouseUp>
+			<OnShow>
+				PetBuddyFrame_OnShow(self);
+			</OnShow>
+			<OnHide>
+				PetBuddyFrame_OnHide(self);
+			</OnHide>
+		</Scripts>
+	</Button>
+</Ui>

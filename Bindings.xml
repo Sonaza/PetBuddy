@@ -1,0 +1,12 @@
+<Bindings>
+	<Binding name="CLICK PetBuddyFrameToggler:LeftButton" header="PETBUDDY" category="ADDONS"/>
+	<Binding name="PETBUDDY_TOGGLE_BUTTONS" category="ADDONS">
+		PetBuddySetUtility(1);
+	</Binding>
+	<Binding name="PETBUDDY_TOGGLE_LOADOUTS" category="ADDONS">
+		PetBuddySetUtility(2);
+	</Binding>
+	<Binding name="PETBUDDY_SEARCH_LOADOUTS" category="ADDONS">
+		PetBuddyFocusSearch();
+	</Binding>
+</Bindings>

@@ -1,0 +1,746 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+	<Font name="PetBuddyFontTitleHuge" font="Interface/AddOns/PetBuddy/Media/DORISPP.TTF" outline="NORMAL" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="16"/>
+		</FontHeight>
+	</Font>
+	<Font name="PetBuddyFontTitle" font="Interface/AddOns/PetBuddy/Media/DORISPP.TTF" outline="NORMAL" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="PetBuddyFontNormal" font="Interface/AddOns/PetBuddy/Media/DORISPP.TTF" outline="NORMAL" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	<Font name="PetBuddyFontSmall" font="Interface/AddOns/PetBuddy/Media/DORISPP.TTF" outline="NORMAL" virtual="true">
+		<FontHeight>
+			<AbsValue val="9"/>
+		</FontHeight>
+	</Font>
+	
+	<CheckButton name="PetBuddyCompanionLoadOutSpellTemplate" virtual="true">
+		<Size x="29" y="29"/>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture name="$parentBackground" inherits="Spellbook-EmptySlot">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Size x="33" y="33"/>
+					<Color r="0.1" g="0.1" b="0.1" a="0.75" />
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentIcon" setAllPoints="true" parentKey="icon">
+					<TexCoords left="0.055" right="0.945" top="0.055" bottom="0.945"/>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="BlackCover" setAllPoints="true" hidden="true">
+					<Color r="0" g="0" b="0" a="0.6"/>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<FontString parentKey="LevelRequirement" inherits="GameFontNormalHuge" justifyH="CENTER" justifyV="MIDDLE">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Color r="1.0" g="0.1" b="0.1"/> <!-- RED_FONT_COLOR -->
+				</FontString>
+				<Texture name="$parentFlyoutArrow" file="Interface\Buttons\ActionBarFlyoutButton" parentKey="FlyoutArrow">
+					<Size x="23" y="11"/>	
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="-3"/>
+					</Anchors>
+					<TexCoords left="0.62500000" right="0.98437500" top="0.82812500" bottom="0.74218750"/>	
+				</Texture>
+				<Texture name="$parentSelected" file="Interface\Buttons\CheckButtonHilight" parentKey="selected" alphaMode="ADD" hidden="true"/>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:SetChecked(false);
+			</OnLoad>
+			<OnEvent>
+			</OnEvent>
+			<PreClick>
+				self:SetChecked(false);
+			</PreClick>
+			<OnClick>
+				if(IsModifiedClick()) then
+					HandleModifiedItemClick(PetJournal_GetPetAbilityHyperlink(self.abilityID, self.petID));
+				else
+					PetBuddyFrame_ShowPetSelect(self);
+				end
+			</OnClick>
+			<OnEnter>
+				if(not PetBuddyFrame.spellSelect:IsShown()) then
+					PetJournal_ShowAbilityTooltip(self, self.abilityID, self.speciesID, self.petID, self.additionalText);
+				end
+			</OnEnter>
+			<OnLeave>
+				PetJournal_HideAbilityTooltip(self);
+			</OnLeave>
+		</Scripts>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+		<HighlightTexture name="$parentHighlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+		<CheckedTexture file="Interface\Buttons\CheckButtonHilight" alphaMode="ADD"/>
+	</CheckButton>
+	
+	<CheckButton name="PetSpellSelectButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
+		<Size x="28" y="28"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentIcon" parentKey="icon">
+					<TexCoords left="0.0625" right="0.9375" top="0.0625" bottom="0.9375"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="BlackCover" setAllPoints="true" hidden="true">
+					<Color r="0" g="0" b="0" a="0.6"/>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString parentKey="LevelRequirement" inherits="GameFontNormalHuge" justifyH="CENTER" justifyV="MIDDLE">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Color r="1.0" g="0.1" b="0.1"/> <!-- RED_FONT_COLOR -->
+				</FontString>
+			</Layer>
+		</Layers>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight"/>
+		<Scripts>
+			<OnClick>
+				if (IsModifiedClick()) then
+					HandleModifiedItemClick(PetJournal_GetPetAbilityHyperlink(self.abilityID, self.petID));
+				else
+					C_PetJournal.SetAbility(self.slotIndex, self.abilityIndex, self.abilityID);
+					PlaySound("igMainMenuOptionCheckBoxOn");
+					PetJournal_UpdatePetLoadOut();
+					self:GetParent():Hide();
+				end
+			</OnClick>
+			<OnEnter>
+				PetJournal_ShowAbilityTooltip(self, self.abilityID, self.speciesID, self.petID, self.additionalText);
+			</OnEnter>
+			<OnLeave>
+				PetJournal_HideAbilityTooltip(self);
+			</OnLeave>
+		</Scripts>
+	</CheckButton>
+	
+	<Button name="PetBuddyPetFrameTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="208" y="46"/>
+		</Size>
+		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\AddOns\PetBuddy\Media\FrameBorder" tile="true">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="4" right="4" top="4" bottom="4"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture name="$parentIcon" parentKey="icon">
+					<Size x="42" y="42"/>
+					<Anchors>
+						<Anchor point="LEFT" x="2" y="0"/>
+					</Anchors>
+					<TexCoords left="0.055" right="0.945" top="0.055" bottom="0.945"/>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="-1">
+				<Texture name="$parentIconBackdrop" file="Interface\AddOns\PetBuddy\Media\Backdrop">
+					<Size x="62" y="62"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parentIcon" x="0" y="0"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="-1">
+				<Texture name="$parentIconGloss" file="Interface\AddOns\PetBuddy\Media\Gloss" alphaMode="ADD">
+					<Size x="56" y="56"/>
+					<Anchors>
+						<Anchor point="CENTER" relativePoint="CENTER" relativeKey="$parent.icon" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="0.6"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentIconBorder" parentKey="iconBorder" file="Interface\AddOns\PetBuddy\Media\Border">
+					<Size x="62" y="62"/>
+					<Anchors>
+						<Anchor point="CENTER" relativePoint="CENTER" relativeKey="$parent.icon"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="isDead" file="Interface\PetBattles\DeadPetIcon" hidden="true">
+					<Size x="38" y="38"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parentIcon" relativePoint="CENTER" x="0" y="1"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentPetTypeTexture" parentKey="petTypeTexture">
+					<Size x="64" y="38"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					</Anchors>
+					<TexCoords left="0.04" right="0.88" top="0.05" bottom="0.32"/>	
+				</Texture>
+				<FontString name="$parentPetName" inherits="PetBuddyFontTitle" justifyH="LEFT" justifyV="CENTER" parentKey="petName">
+					<Size x="150" y="16"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentIcon" relativePoint="TOPRIGHT" x="4" y="4"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentSlotInfoText" inherits="PetBuddyFontSmall" justifyH="LEFT" justifyV="TOP" parentKey="slotInfoText" hidden="true">
+					<Size x="160" y="22"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentPetName" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentDragButton" parentKey="dragButton">
+				<Size x="42" y="42"/>
+				<Anchors>
+					<Anchor point="CENTER" relativeTo="$parentIcon" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="petTypeIcon" parent="$parent">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="CENTER" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="-5" y="6"/>
+							</Anchors>
+							<TexCoords left="0.79687500" right="0.49218750" top="0.50390625" bottom="0.65625000"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<HighlightTexture name="$parentHighlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton");
+						self:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp");
+					</OnLoad>
+					<OnClick>
+						PetBuddyFrameDragButton_OnClick(self, button);
+					</OnClick>
+					<OnDragStart>
+						PetBuddyFrameDragButton_OnDragStart(self);
+					</OnDragStart>
+					<OnReceiveDrag>
+						PetBuddyFrameDragButton_OnReceiveDrag(self);
+					</OnReceiveDrag>
+					<OnEnter>
+						PetBuddyFrameDragButton_OnEnter(self);
+					</OnEnter>
+					<OnLeave>
+						PetBuddyFrameDragButton_OnLeave(self);
+					</OnLeave>
+				</Scripts>
+			</Button>
+			<Frame name="$parentGlowHighlight" parentKey="glowHighlight" hidden="true">
+				<Size x="44" y="44"/>
+				<Anchors>
+					<Anchor point="CENTER" relativeTo="$parentIcon" relativePoint="CENTER"/>
+				</Anchors>
+				<Animations>
+					<AnimationGroup parentKey="glow" looping="REPEAT">
+						<Alpha change="-0.7" duration="0.8" order="1" smoothing="IN_OUT"/>
+						<Alpha change="0.7" duration="0.8" order="2" smoothing="IN_OUT"/>
+					</AnimationGroup>
+				</Animations>
+				<Layers>
+					<Layer level="BORDER" textureSubLevel="-1">
+						<Texture file="Interface/BUTTONS/CheckButtonHilight" alphaMode="ADD">
+							<Size x="40" y="40"/>
+							<Anchors>
+								<Anchor point="CENTER" x="0" y="0"/>
+							</Anchors>
+							<TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+							<Color r="1" g="1" b="1" a="0.8"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnShow>
+						self.glow:Play();
+					</OnShow>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentStats" parentKey="stats">
+				<Size x="152" y="19"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentPetName" relativePoint="BOTTOMLEFT" x="0" y="-3" />
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture setAllPoints="true">
+							<Color r="0" g="0" b="0" a="0.5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Frames>
+					<StatusBar name="$parentPetHealth" parentKey="petHealth">
+						<Size>
+							<AbsDimension x="150" y="9"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" x="1" y="-1" />
+						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture setAllPoints="true">
+									<Color r="0" g="0" b="0" a="0.75"/>
+								</Texture>
+							</Layer>
+							<Layer level="ARTWORK" textureSubLevel="1">
+								<FontString name="$parentText" inherits="PetBuddyFontNormal" justifyH="RIGHT" justifyV="BOTTOM" parentKey="text">
+									<Size x="100" y="10"/>
+									<Anchors>
+										<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT" x="-5" y="2"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<BarTexture file="Interface\AddOns\PetBuddy\Media\RenAscensionL"/>
+						<BarColor r="0.22" g="1.0" b="0.08"/>
+						<Scripts>
+							<OnLoad>
+								self:SetMinMaxValues(0, 1);
+								self:SetValue(1);
+							</OnLoad>
+						</Scripts>
+					</StatusBar>
+					<StatusBar name="$parentPetExperience" parentKey="petExperience">
+						<Size>
+							<AbsDimension x="150" y="7"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentPetHealth" relativePoint="BOTTOMLEFT" x="0" y="-1" />
+						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture setAllPoints="true">
+									<Color r="0" g="0" b="0" a="0.75"/>
+								</Texture>		
+							</Layer>
+							<Layer level="ARTWORK" textureSubLevel="1">
+								<FontString name="$parentText" inherits="PetBuddyFontSmall" justifyH="RIGHT" justifyV="TOP" parentKey="text">
+									<Size x="100" y="10"/>
+									<Anchors>
+										<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT" x="-7" y="-1"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<BarTexture file="Interface\AddOns\PetBuddy\Media\RenAscensionL"/>
+						<BarColor r="0.2" g="0.7" b="1.0"/>
+						<Scripts>
+							<OnLoad>
+								self:SetMinMaxValues(0, 1);
+								self:SetValue(1);
+							</OnLoad>
+						</Scripts>
+					</StatusBar>
+					<!-- <Frame name="$parentBackdropFrame" parentKey="backdropFrame">
+						<Size x="152" y="19"/>
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent.petHealth" relativePoint="TOP" x="0" y="1"/>
+						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture setAllPoints="true">
+									<Color r="0" g="0" b="0" a="0.5"/>
+								</Texture>		
+							</Layer>
+						</Layers>
+					</Frame> -->
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:EnableMouse(false);
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentAbilities" parentKey="abilities" hidden="true">
+				<Size x="160" y="46"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentPetName" relativePoint="BOTTOMLEFT" x="10" y="-3" />
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parentSpell1" inherits="PetBuddyCompanionLoadOutSpellTemplate" id="1" parentKey="spell1">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="0" y="0"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parentSpell2" inherits="PetBuddyCompanionLoadOutSpellTemplate" id="2" parentKey="spell2">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentSpell1" RelativePoint="RIGHT" x="8" y="0"/>
+						</Anchors>
+					</CheckButton>
+					<CheckButton name="$parentSpell3" inherits="PetBuddyCompanionLoadOutSpellTemplate" id="3" parentKey="spell3">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parentSpell2" RelativePoint="RIGHT" x="8" y="0"/>
+						</Anchors>
+					</CheckButton>
+					
+					<Button name="$parentTypeInfo" parentKey="typeInfo">
+						<Size x="32" y="32"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT" x="-6" y="14"/>
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<Texture parentKey="icon">
+									<Size x="32" y="32"/>
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+									<TexCoords left="0.79687500" right="0.49218750" top="0.50390625" bottom="0.65625000"/>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								PetJournal_ShowAbilityTooltip(self, self.abilityID, self.speciesID, self.petID);
+							</OnEnter>
+							<OnLeave>
+								PetJournal_HideAbilityTooltip(self);
+							</OnLeave>
+							<OnClick>
+								PetBuddyPetFrame_ResetAbilitySwitches();
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetScale(0.90);
+						tinsert(UISpecialFrames, self:GetName());
+					</OnLoad>
+					<OnHide>
+						self:GetParent().SwitchingAbilities = false;
+						self:GetParent().stats:Show();
+						PetBuddyFrame.spellSelect:Hide();
+					</OnHide>
+				</Scripts>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton")
+				self:EnableMouseWheel(true);
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+				self:SetBackdropBorderColor(0, 0, 0, 0.85);
+				self:SetBackdropColor(0, 0, 0, 0.7);
+				
+				self.petAbilities = {}
+				self.petAbilityLevels = {}
+			</OnLoad>
+			<OnClick>
+				PetBuddyPetFrame_OnClick(self, button)
+			</OnClick>
+			<OnMouseWheel>
+				PetBuddyFrame_OnMouseWheel(self, delta)
+			</OnMouseWheel>
+			<OnDragStart>
+				PetBuddyFrame_StartMoving();
+			</OnDragStart>
+			<OnDragStop>
+				PetBuddyFrame_StopMoving();
+			</OnDragStop>
+		</Scripts>
+	</Button>
+	
+	<CheckButton name="PetBuddyButtonTemplate" inherits="ActionButtonTemplate,SecureActionButtonTemplate" virtual="true">
+		<Anchors>
+			<Anchor point="RIGHT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Layers>
+			<Layer Level="BACKGROUND" textureSubLevel="1">
+				<Texture name="$parentIconGloss" file="Interface\AddOns\PetBuddy\Media\Gloss" alphaMode="ADD">
+					<Size x="50" y="50"/>
+					<Anchors>
+						<Anchor point="CENTER" relativePoint="CENTER" relativeKey="$parent.icon" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="0.6"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				PetBuddyFrameButton_Initialize(self);
+			</OnLoad>
+			<OnEvent>
+				PetBuddyFrameButton_OnEvent(self, event, ...);
+			</OnEvent>
+			<OnEnter>
+				PetBuddyFrameButton_OnEnter(self);
+			</OnEnter>
+			<OnLeave>
+				PetBuddyFrameButton_OnLeave(self);
+			</OnLeave>
+		</Scripts>
+		<NormalTexture name="$parentNormalTexture" parentKey="NormalTexture" file="Interface\AddOns\PetBuddy\Media\Border">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="-11" y="11"/>
+				<Anchor point="BOTTOMRIGHT" x="11" y="-11"/>
+			</Anchors>
+			<Color r="0.05" g="0.05" b="0.05"/>
+		</NormalTexture>
+		<PushedTexture file="Interface\AddOns\PetBuddy\Media\Border">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="-10" y="10"/>
+				<Anchor point="BOTTOMRIGHT" x="10" y="-10"/>
+			</Anchors>
+			<Color r="0.8" g="0.8" b="0.8"/>
+		</PushedTexture>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight">
+			<Color r="1" g="1" b="1" a="0.7"/>
+		</CheckedTexture>
+	</CheckButton>
+	
+	<Frame name="PetBuddyFlyoutTemplate" virtual="true">
+		<Anchors>
+			<Anchor point="TOP"/>
+		</Anchors>
+		<Frames>
+			<CheckButton name="$parentButton1" inherits="PetBuddyButtonTemplate" id="1">
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="0" y="-10"/>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						PetBuddyFrameButton_Initialize(self, "item", 98715);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				PetBuddyFlyout_OnShow(self);
+			</OnShow>
+			<OnHide>
+				PetBuddyFlyout_OnHide(self);
+			</OnHide>
+		</Scripts>
+	</Frame>
+	
+	<Texture name="PetBuddyButtonHighlightTextureTemplate" file="Interface\AddOns\PetBuddy\Media\LoadoutButtonHighlight" alphaMode="ADD" virtual="true">
+		<TexCoords left="0" right="0.8125" top="0" bottom="0.71875"/>
+	</Texture>
+	
+	<Frame name="PetBuddyPetIconTemplate" virtual="true">
+		<Size x="44" y="44"/>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture name="$parentIcon" parentKey="icon">
+					<Size x="42" y="42"/>
+					<Anchors>
+						<Anchor point="LEFT" x="2" y="0"/>
+					</Anchors>
+					<TexCoords left="0.055" right="0.945" top="0.055" bottom="0.945"/>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="-1">
+				<Texture name="$parentIconBackdrop" file="Interface\AddOns\PetBuddy\Media\Backdrop">
+					<Size x="62" y="62"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parentIcon" x="0" y="0"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="-1">
+				<Texture name="$parentIconGloss" file="Interface\AddOns\PetBuddy\Media\Gloss" alphaMode="ADD">
+					<Size x="56" y="56"/>
+					<Anchors>
+						<Anchor point="CENTER" relativePoint="CENTER" relativeKey="$parent.icon" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="0.6"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentIconBorder" parentKey="iconBorder" file="Interface\AddOns\PetBuddy\Media\Border">
+					<Size x="62" y="62"/>
+					<Anchors>
+						<Anchor point="CENTER" relativePoint="CENTER" relativeKey="$parent.icon"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="isDead" file="Interface\PetBattles\DeadPetIcon" hidden="true">
+					<Size x="38" y="38"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parentIcon" relativePoint="CENTER" x="0" y="1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="petTypeIcon">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="$parentIcon" relativePoint="BOTTOMRIGHT" x="-5" y="6"/>
+					</Anchors>
+					<TexCoords left="0.79687500" right="0.49218750" top="0.50390625" bottom="0.65625000"/>
+				</Texture>
+				<FontString name="$parentLevel" inherits="PetBuddyFontTitle" justifyH="LEFT" parentKey="level">
+					<Size x="30" y="16"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentIcon" relativePoint="BOTTOMLEFT" x="1" y="-3"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:EnableMouse(false);
+				self:SetScale(0.75);
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+	<Slider name="PetBuddyLoadoutsScrollBarTemplate" parentKey="scrollBar" virtual="true">
+		<Size x="16" y="0"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBG" parentKey="trackBG">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="6" y="-6"/>
+						<Anchor point="BOTTOMRIGHT" x="-6" y="6"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a=".75"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentScrollUpButton" inherits="UIPanelScrollUpButtonTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="BOTTOM" relativePoint="TOP" x="0" y="-2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad function="HybridScrollFrameScrollUp_OnLoad"/>
+					<OnClick  function="HybridScrollFrameScrollButton_OnClick"/>
+				</Scripts>
+			</Button>
+			<Button name="$parentScrollDownButton" inherits="UIPanelScrollDownButtonTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="TOP" relativePoint="BOTTOM" x="0" y="2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad function="HybridScrollFrameScrollDown_OnLoad"/>
+					<OnClick function="HybridScrollFrameScrollButton_OnClick"/>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnValueChanged function="HybridScrollFrame_OnValueChanged"/>
+		</Scripts>
+		<ThumbTexture name="$parentThumbTexture" inherits="HybridScrollBarButton" file="Interface\AddOns\PetBuddy\Media\SliderThumb" parentKey="thumbTexture" alphaMode="ADD">
+			<Size x="16" y="16"/>
+			<TexCoords left="0" right="1" top="0" bottom="1"/>
+			<!-- <TexCoords left="0.1875" right="0.8125" top="0" bottom="1"/> -->
+		</ThumbTexture>		
+	</Slider>
+	
+	<Button name="PetBuddyLoadoutsButtonTemplate" virtual="true">
+		<Size x="208" y="46"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="background" atlas="PetList-ButtonBackground"/>
+			</Layer>
+			<Layer level="BACKGROUND" textureSubLevel="1">
+				<Texture parentKey="backgroundError" file="Interface\AddOns\PetBuddy\Media\Error" hidden="true">
+					<Size x="52" y="44"/>
+					<Anchors>
+						<Anchor point="LEFT" x="1" y="0"/>
+					</Anchors>
+					<Color r="0.5" g="0.5" b="0.5" a="0.5"/>
+					<TexCoords left="0.125" right="1" top="0.15625" bottom="0.875"/>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" inherits="PetBuddyFontNormal" justifyH="LEFT" justifyV="TOP" parentKey="name">
+					<Size x="90" y="24"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="7" y="-11" />
+					</Anchors>
+				</FontString>
+				<FontString name="$parentErrorText" inherits="PetBuddyFontTitle" justifyH="CENTER" justifyV="CENTER" parentKey="errorText" hidden="true">
+					<Size x="120" y="24"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="7" y="-11" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		
+		<Frames>
+			<Frame name="$parentPet3" inherits="PetBuddyPetIconTemplate" parentKey="pet3" id="3">
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT" x="-8" y="0"/>
+				</Anchors>
+			</Frame>
+			<Frame name="$parentPet2" inherits="PetBuddyPetIconTemplate" parentKey="pet2" id="2">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.pet3" relativePoint="LEFT" x="-3" y="0"/>
+				</Anchors>
+			</Frame>
+			<Frame name="$parentPet1" inherits="PetBuddyPetIconTemplate" parentKey="pet1" id="1">
+				<Anchors>
+					<Anchor point="RIGHT"  relativeKey="$parent.pet2" relativePoint="LEFT" x="-3" y="0"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		
+		<HighlightTexture inherits="PetBuddyButtonHighlightTextureTemplate"/>
+		<PushedTexture inherits="PetBuddyButtonHighlightTextureTemplate">
+			<Color r="1" g="0.3" b="0.3"/>
+		</PushedTexture>
+		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+			</OnLoad>
+			<OnClick>
+				PetBuddyLoadoutsButton_OnClick(self, button)
+			</OnClick>
+			<!-- <OnEnter>
+				PetBuddyLoadoutsButton_OnEnter(self);
+			</OnEnter>
+			<OnEnter>
+				PetBuddyLoadoutsButton_OnLeave(self);
+			</OnEnter> -->
+		</Scripts>
+	</Button>
+	
+</Ui>
