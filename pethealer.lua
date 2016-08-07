@@ -6,17 +6,14 @@
 	Questions can be sent to temu92@gmail.com
 --]]
 
-local ADDON_NAME, SHARED_DATA = ...;
-local A = unpack(SHARED_DATA);
-
-ASDAS = { ADDON_NAME, SHARED_DATA, };
+local ADDON_NAME, addon = ...;
 
 function AutoHealButton_OnShow(self)
-	self:SetChecked(A.db.global.AutoHealPets);
+	self:SetChecked(addon.db.global.AutoHealPets);
 end
 
 function AutoHealButton_OnClick(self)
-	A.db.global.AutoHealPets = self:GetChecked();
+	addon.db.global.AutoHealPets = self:GetChecked();
 end
 
 local savedJournalFilters = {
@@ -26,22 +23,21 @@ local savedJournalFilters = {
 	hasSave = false,
 }
 
-function A:ResetJournalFiltering()
+function addon:ResetJournalFiltering()
 	if(not PetJournalSearchBox) then return end
 	
 	local numTypes = C_PetJournal.GetNumPetTypes();
 	for typeIndex = 1, numTypes do
-		savedJournalFilters.types[typeIndex] = C_PetJournal.IsPetTypeFiltered(typeIndex);
+		savedJournalFilters.types[typeIndex] = not C_PetJournal.IsPetTypeChecked(typeIndex);
 	end
 	
 	local numSources = C_PetJournal.GetNumPetSources();
 	for sourceIndex = 1, numSources do
-		savedJournalFilters.sources[sourceIndex] = C_PetJournal.IsPetSourceFiltered(sourceIndex);
+		savedJournalFilters.sources[sourceIndex] = not C_PetJournal.IsPetSourceChecked(sourceIndex);
 	end
 	
-	
-	C_PetJournal.AddAllPetSourcesFilter();
-	C_PetJournal.AddAllPetTypesFilter();
+	C_PetJournal.SetAllPetSourcesChecked(true);
+	C_PetJournal.SetAllPetTypesChecked(true);
 	C_PetJournal.ClearSearchFilter();
 	
 	savedJournalFilters.search = PetJournalSearchBox:GetText();
@@ -50,11 +46,11 @@ function A:ResetJournalFiltering()
 	savedJournalFilters.hasSave = true;
 end
 
-function A:RestoreJournalFiltering()
+function addon:RestoreJournalFiltering()
 	if(not savedJournalFilters.hasSave) then return end
 	
-	C_PetJournal.AddAllPetSourcesFilter();
-	C_PetJournal.AddAllPetTypesFilter();
+	C_PetJournal.SetAllPetSourcesChecked(true);
+	C_PetJournal.SetAllPetTypesChecked(true);
 	C_PetJournal.ClearSearchFilter();
 	
 	local numTypes = C_PetJournal.GetNumPetTypes();
@@ -67,7 +63,7 @@ function A:RestoreJournalFiltering()
 	local numSources = C_PetJournal.GetNumPetSources();
 	for sourceIndex = 1, numSources do
 		if(savedJournalFilters.sources[sourceIndex] ~= nil) then
-			C_PetJournal.SetPetSourceFilter(sourceIndex, not savedJournalFilters.sources[sourceIndex]);
+			C_PetJournal.SetPetSourceChecked(sourceIndex, not savedJournalFilters.sources[sourceIndex]);
 		end
 	end
 	
@@ -78,12 +74,12 @@ function A:RestoreJournalFiltering()
 end
 
 local numWoundedPets, numWoundedActivePets = nil, nil;
-function A:UpdateNumWoundedPets()
+function addon:UpdateNumWoundedPets()
 	numWoundedPets = 0;
 	numWoundedActivePets = 0;
 	
 	if(PetJournal and not PetJournal:IsVisible() or not PetJournal) then
-		A:ResetJournalFiltering();
+		addon:ResetJournalFiltering();
 		
 		local _, numPets = C_PetJournal.GetNumPets();
 		for index = 1, numPets do
@@ -97,7 +93,7 @@ function A:UpdateNumWoundedPets()
 			end
 		end
 		
-		A:RestoreJournalFiltering();
+		addon:RestoreJournalFiltering();
 	end
 	
 	for slotIndex = 1,3 do
@@ -111,9 +107,9 @@ function A:UpdateNumWoundedPets()
 	end
 end
 
-function A:GetNumWoundedPets(all_pets)
+function addon:GetNumWoundedPets(all_pets)
 	if(numWoundedPets == nil or numWoundedActivePets == nil) then
-		A:UpdateNumWoundedPets();
+		addon:UpdateNumWoundedPets();
 	end
 	
 	local all_pets = all_pets;
@@ -126,8 +122,8 @@ function A:GetNumWoundedPets(all_pets)
 	end
 end
 
-function A:GetRemainingHealCooldown()
-	return math.floor(math.max(0, 180 - (GetTime() - A.PetHealTime)));
+function addon:GetRemainingHealCooldown()
+	return math.floor(math.max(0, 180 - (GetTime() - addon.PetHealTime)));
 end
 
 local MIN_ABBR, SEC_ABBR = gsub(MINUTE_ONELETTER_ABBR, "%%d%s*", ""), gsub(SECOND_ONELETTER_ABBR, "%%d%s*", "");
@@ -147,29 +143,29 @@ local function FormatTime(t)
 	end
 end
 
-function A:UpdateWoundedText()
-	if(not A.PetHealer.GossipID) then return end
+function addon:UpdateWoundedText()
+	if(not addon.PetHealer.GossipID) then return end
 	
-	local wounded = A:GetNumWoundedPets();
+	local wounded = addon:GetNumWoundedPets();
 	
 	local text;
-	local remainingCooldown = A:GetRemainingHealCooldown();
+	local remainingCooldown = addon:GetRemainingHealCooldown();
 	
-	if(A.PetHealer.IsGarrisonNPC and remainingCooldown > 0) then
+	if(addon.PetHealer.IsGarrisonNPC and remainingCooldown > 0) then
 		text = string.format("Heal and Revive Pets (%s / %d wounded)", FormatTime(remainingCooldown), wounded);
-	elseif(A.PetHealer.IsGarrisonNPC and A.PetHealer.IsFreeNPC) then
+	elseif(addon.PetHealer.IsGarrisonNPC and addon.PetHealer.IsFreeNPC) then
 		text = string.format("Heal and Revive Pets (free / %d wounded)", wounded);
 	else
 		text = string.format("Heal and Revive Pets (%s / %d wounded)", GetCoinTextureString(1000), wounded);
 	end
 	
-	_G['GossipTitleButton' .. A.PetHealer.GossipID]:SetText(text);
+	_G['GossipTitleButton' .. addon.PetHealer.GossipID]:SetText(text);
 end
 
-function A:GOSSIP_SHOW()
-	A:UpdateNumWoundedPets();
+function addon:GOSSIP_SHOW()
+	addon:UpdateNumWoundedPets();
 	
-	A.PetHealer = {
+	addon.PetHealer = {
 		GossipID = nil,
 	};
 	
@@ -200,31 +196,31 @@ function A:GOSSIP_SHOW()
 	if(GetNumGossipAvailableQuests() > 0) then numQuests = numQuests + 1 end
 	if(GetNumGossipActiveQuests() > 0) then numQuests = numQuests + 1 end
 	
-	A.PetHealer = {
+	addon.PetHealer = {
 		GossipID = healingGossipID + numQuests,
 		IsGarrisonNPC = isGarrisonNPC,
 		IsFreeNPC = isFreeNPC,
 	}
 	
-	A:UpdateWoundedText();
+	addon:UpdateWoundedText();
 	
-	local remainingCooldown = A:GetRemainingHealCooldown();
-	if(self.db.global.AutoHealPets and A:GetNumWoundedPets() > 0 and remainingCooldown == 0) then
+	local remainingCooldown = addon:GetRemainingHealCooldown();
+	if(self.db.global.AutoHealPets and addon:GetNumWoundedPets() > 0 and remainingCooldown == 0) then
 		SelectGossipOption(healingGossipID);
 	end
 end
 
-function A:GOSSIP_CLOSED()
+function addon:GOSSIP_CLOSED()
 	if(PetBuddyAutoHealButton) then
 		PetBuddyAutoHealButton:Hide();
 	end
 end
 
-function A:GOSSIP_CONFIRM(event, index, message, cost)
+function addon:GOSSIP_CONFIRM(event, index, message, cost)
 	if(not self.db.global.AutoHealPetsFee) then return end
 	
-	if(message == "A small fee for supplies is required." and cost == 1000) then
-		if(A:GetNumWoundedPets() > 0) then
+	if(message == "addon small fee for supplies is required." and cost == 1000) then
+		if(addon:GetNumWoundedPets() > 0) then
 			StaticPopup1Button1:Click();
 		else
 			StaticPopup1Button2:Click();

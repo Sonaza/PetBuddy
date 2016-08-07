@@ -6,17 +6,17 @@
 	Questions can be sent to temu92@gmail.com
 --]]
 
-local ADDON_NAME, SHARED_DATA = ...;
-local A, E = unpack(SHARED_DATA);
+local ADDON_NAME, addon = ...;
+local E = addon.E;
 
 local LibStub = LibStub;
 local AceDB = LibStub("AceDB-3.0");
 
-local LSM = LibStub("LibSharedMedia-3.0");
+local LibSharedMedia = LibStub("LibSharedMedia-3.0");
 
--- Adding default media to LSM if they're not already added
-LSM:Register("font", "DorisPP", [[Interface\AddOns\PetBuddy\media\DORISPP.ttf]]);
-LSM:Register("statusbar", "RenAscensionL", [[Interface\AddOns\PetBuddy\media\RenAscensionL.tga]]);
+-- Adding default media to LibSharedMedia if they're not already added
+LibSharedMedia:Register("font", "DorisPP", [[Interface\AddOns\PetBuddy\media\DORISPP.ttf]]);
+LibSharedMedia:Register("statusbar", "RenAscensionL", [[Interface\AddOns\PetBuddy\media\RenAscensionL.tga]]);
 
 E.VISIBILITY_MODE = {
 	DO_NOTHING 	= 0x1,
@@ -30,7 +30,7 @@ E.AUTO_SUMMON_MODE = {
 	ANY			= 0x3,	
 };
 
-function A:InitializeDatabase()
+function addon:InitializeDatabase()
 	local defaults = {
 		char = {
 			AutoSummonLastPetID = nil,
@@ -90,14 +90,14 @@ function A:InitializeDatabase()
 	};
 	
 	self.db = AceDB:New("PetBuddyDB", defaults);
-	A:RestoreSavedSettings();
+	addon:RestoreSavedSettings();
 end
 
 function PetBuddyFrame_SavePosition()
-	if(not A.db) then return end
+	if(not addon.db) then return end
 	
 	local point, _, relativePoint, x, y = PetBuddyFrame:GetPoint()
-	A.db.global.Position = {
+	addon.db.global.Position = {
 		Point = point,
 		RelativePoint = relativePoint,
 		x = x,
@@ -105,10 +105,10 @@ function PetBuddyFrame_SavePosition()
 	};
 end
 
-function A:RestoreSavedSettings()
+function addon:RestoreSavedSettings()
 	if(InCombatLockdown()) then return end
 	
-	A:UpdateUtilityMenuState();
+	addon:UpdateUtilityMenuState();
 	
 	PetBuddyFrameTitlePetCharms:SetShown(self.db.global.ShowPetCharms);
 	
@@ -118,7 +118,7 @@ function A:RestoreSavedSettings()
 		petFrame.stats.petExperience.text:SetShown(self.db.global.PetStatsText.Enabled);
 	end
 	
-	A:RefreshMedia();
+	addon:RefreshMedia();
 	
 	if(self.db.global.ShowPepe) then
 		PetBuddyFrameTitle.pepeFrame:Show();
@@ -135,12 +135,12 @@ function A:RestoreSavedSettings()
 		PetBuddyFrame:Hide();
 	end
 	
-	A:SetWindowScale(self.db.global.WindowScale);
+	addon:SetWindowScale(self.db.global.WindowScale);
 end
 
-function A:RefreshMedia(font, barTexture)
-	local fontPath = LSM:Fetch("font", font or self.db.global.fontFace);
-	local statusBarPath = LSM:Fetch("statusbar", barTexture or self.db.global.barTexture);
+function addon:RefreshMedia(font, barTexture)
+	local fontPath = LibSharedMedia:Fetch("font", font or self.db.global.fontFace);
+	local statusBarPath = LibSharedMedia:Fetch("statusbar", barTexture or self.db.global.barTexture);
 	
 	local fontSize = self.db.global.fontSize;
 	
@@ -156,19 +156,19 @@ function A:RefreshMedia(font, barTexture)
 	end
 end
 
-function A:SetWindowScale(scale)
+function addon:SetWindowScale(scale)
 	self.db.global.WindowScale = scale or 1.0;
 	PetBuddyFrame:SetScale(self.db.global.WindowScale);
 end
 
-function A:GetWindowScaleMenu()
+function addon:GetWindowScaleMenu()
 	local windowScales = { 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, };
 	local menu = {};
 	
 	for index, scale in ipairs(windowScales) do
 		tinsert(menu, {
 			text = string.format("%d%%", scale * 100),
-			func = function() A:SetWindowScale(scale); CloseMenus(); end,
+			func = function() addon:SetWindowScale(scale); CloseMenus(); end,
 			checked = function() return self.db.global.WindowScale == scale end,
 		});
 	end
@@ -176,14 +176,14 @@ function A:GetWindowScaleMenu()
 	return menu;
 end
 
-function A:GetPrimaryMenuData()
+function addon:GetPrimaryMenuData()
 	local sharedMediaFonts = {};
-	for index, font in ipairs(LSM:List("font")) do
+	for index, font in ipairs(LibSharedMedia:List("font")) do
 		tinsert(sharedMediaFonts, {
 			text = font,
 			func = function()
 				self.db.global.fontFace = font;
-				A:RefreshMedia();
+				addon:RefreshMedia();
 			end,
 			checked = function() return self.db.global.fontFace == font; end,
 		});
@@ -193,16 +193,16 @@ function A:GetPrimaryMenuData()
 	for size = 8, 16 do
 		tinsert(fontSizes, {
 			text = tostring(size),
-			func = function() self.db.global.fontSize = size; A:RefreshMedia(); end,
+			func = function() self.db.global.fontSize = size; addon:RefreshMedia(); end,
 			checked = function() return self.db.global.fontSize == size; end,
 		});
 	end
 	
 	local sharedMediaBarTextures = {};
-	for index, statusbar in ipairs(LSM:List("statusbar")) do
+	for index, statusbar in ipairs(LibSharedMedia:List("statusbar")) do
 		tinsert(sharedMediaBarTextures, {
 			text = statusbar,
-			func = function() self.db.global.barTexture = statusbar; A:RefreshMedia(); end,
+			func = function() self.db.global.barTexture = statusbar; addon:RefreshMedia(); end,
 			checked = function() return self.db.global.barTexture == statusbar; end,
 		});
 	end
@@ -224,20 +224,20 @@ function A:GetPrimaryMenuData()
 			text = "Toggle Displays", isTitle = true, notCheckable = true,
 		},
 		{
-			text = "Show Pet Tooltips",
+			text = "Show pet tooltips",
 			func = function() self.db.global.ShowPetTooltips = not self.db.global.ShowPetTooltips; end,
 			checked = function() return self.db.global.ShowPetTooltips; end,
 			isNotRadio = true,
 		},
 		{
-			text = "Show Pet Charms",
-			func = function() self.db.global.ShowPetCharms = not self.db.global.ShowPetCharms; A:RestoreSavedSettings() end,
+			text = "Show pet charms",
+			func = function() self.db.global.ShowPetCharms = not self.db.global.ShowPetCharms; addon:RestoreSavedSettings() end,
 			checked = function() return self.db.global.ShowPetCharms; end,
 			isNotRadio = true,
 		},
 		{
-			text = "Show Pet Health and Experience Text",
-			func = function() self.db.global.PetStatsText.Enabled = not self.db.global.PetStatsText.Enabled; A:RestoreSavedSettings() end,
+			text = "Show pet health and experience text",
+			func = function() self.db.global.PetStatsText.Enabled = not self.db.global.PetStatsText.Enabled; addon:RestoreSavedSettings() end,
 			checked = function() return self.db.global.PetStatsText.Enabled; end,
 			isNotRadio = true,
 			hasArrow = true,
@@ -246,8 +246,8 @@ function A:GetPrimaryMenuData()
 					text = "Health Text", notCheckable = true, isTitle = true,
 				},
 				{
-					text = "Show Percentage",
-					func = function() self.db.global.PetStatsText.ShowHealthPercentage = not self.db.global.PetStatsText.ShowHealthPercentage; A:UpdatePets() end,
+					text = "Show percentage",
+					func = function() self.db.global.PetStatsText.ShowHealthPercentage = not self.db.global.PetStatsText.ShowHealthPercentage; addon:UpdatePets() end,
 					checked = function() return self.db.global.PetStatsText.ShowHealthPercentage; end,
 					isNotRadio = true,
 				},
@@ -258,19 +258,19 @@ function A:GetPrimaryMenuData()
 					text = "Experience Text", notCheckable = true, isTitle = true,
 				},
 				{
-					text = "Show Percentage",
-					func = function() self.db.global.PetStatsText.ShowExperiencePercentage = not self.db.global.PetStatsText.ShowExperiencePercentage; A:UpdatePets() end,
+					text = "Show percentage",
+					func = function() self.db.global.PetStatsText.ShowExperiencePercentage = not self.db.global.PetStatsText.ShowExperiencePercentage; addon:UpdatePets() end,
 					checked = function() return self.db.global.PetStatsText.ShowExperiencePercentage; end,
 					isNotRadio = true,
 				},
 				{
-					text = "Display Current Experience",
-					func = function() self.db.global.PetStatsText.RemainingExperience = false; A:UpdatePets() end,
+					text = "Display current experience",
+					func = function() self.db.global.PetStatsText.RemainingExperience = false; addon:UpdatePets() end,
 					checked = function() return not self.db.global.PetStatsText.RemainingExperience; end,
 				},
 				{
-					text = "Display Experience to Level",
-					func = function() self.db.global.PetStatsText.RemainingExperience = true; A:UpdatePets() end,
+					text = "Display experience to level",
+					func = function() self.db.global.PetStatsText.RemainingExperience = true; addon:UpdatePets() end,
 					checked = function() return self.db.global.PetStatsText.RemainingExperience; end,
 				},
 			},
@@ -282,8 +282,8 @@ function A:GetPrimaryMenuData()
 			text = "Automation", isTitle = true, notCheckable = true,
 		},
 		{
-			text = "Always Resummon Companion Pet",
-			func = function() self.db.global.AutoSummonPet = not self.db.global.AutoSummonPet; A:UpdateDatabrokerText(); CloseMenus(); end,
+			text = "Always resummon companion",
+			func = function() self.db.global.AutoSummonPet = not self.db.global.AutoSummonPet; addon:UpdateDatabrokerText(); CloseMenus(); end,
 			checked = function() return self.db.global.AutoSummonPet; end,
 			isNotRadio = true,
 			hasArrow = true,
@@ -292,24 +292,24 @@ function A:GetPrimaryMenuData()
 					text = "Resummon Options", isTitle = true, notCheckable = true,
 				},
 				{
-					text = "Last Used Pet",
-					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.LAST_PET; A:UpdateAutoResummon(true); end,
+					text = "Last used pet",
+					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.LAST_PET; addon:UpdateAutoResummon(true); end,
 					checked = function() return self.db.global.AutoSummonMode == E.AUTO_SUMMON_MODE.LAST_PET; end,
 				},
 				{
-					text = "Random Favorite Pet",
-					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.FAVORITE; A:UpdateAutoResummon(true); end,
+					text = "Random favorite pet",
+					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.FAVORITE; addon:UpdateAutoResummon(true); end,
 					checked = function() return self.db.global.AutoSummonMode == E.AUTO_SUMMON_MODE.FAVORITE; end,
 				},
 				{
-					text = "Any Random Pet",
-					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.ANY; A:UpdateAutoResummon(true); end,
+					text = "Any random pet",
+					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.ANY; addon:UpdateAutoResummon(true); end,
 					checked = function() return self.db.global.AutoSummonMode == E.AUTO_SUMMON_MODE.ANY; end,
 				},
 			},
 		},
 		{
-			text = "Automatically Heal Pets at Stables",
+			text = "Automatically heal pets at stables",
 			func = function() self.db.global.AutoHealPets = not self.db.global.AutoHealPets; AutoHealButton_OnShow(PetBuddyAutoHealButton) end,
 			checked = function() return self.db.global.AutoHealPets; end,
 			isNotRadio = true,
@@ -319,7 +319,7 @@ function A:GetPrimaryMenuData()
 					text = "Auto Pet Healer", isTitle = true, notCheckable = true,
 				},
 				{
-					text = "Also Automatically Accept the Healing Fee",
+					text = "Also automatically accept the healing fee",
 					func = function() self.db.global.AutoHealPetsFee = not self.db.global.AutoHealPetsFee; end,
 					checked = function() return self.db.global.AutoHealPetsFee; end,
 					isNotRadio = true,
@@ -333,7 +333,7 @@ function A:GetPrimaryMenuData()
 			text = "Visibility Options", isTitle = true, notCheckable = true,
 		},
 		{
-			text = "When Starting Pet Battle",
+			text = "When starting pet battle",
 			notCheckable = true,
 			hasArrow = true,
 			menuList = {
@@ -348,20 +348,20 @@ function A:GetPrimaryMenuData()
 					checked = function() return self.db.global.PetBattleVisiblityMode == E.VISIBILITY_MODE.HIDE; end,
 				},
 				{
-					text = "Do Nothing",
+					text = "Do nothing",
 					func = function() self.db.global.PetBattleVisiblityMode = E.VISIBILITY_MODE.DO_NOTHING; end,
 					checked = function() return self.db.global.PetBattleVisiblityMode == E.VISIBILITY_MODE.DO_NOTHING; end,
 				},
 			},
 		},
 		{
-			text = "Hide When Entering Combat",
+			text = "Hide when entering combat",
 			func = function() self.db.global.HideInCombat = not self.db.global.HideInCombat; end,
 			checked = function() return self.db.global.HideInCombat; end,
 			isNotRadio = true,
 		},
 		{
-			text = "Enable Cuteness",
+			text = "Enable cuteness",
 			func = function()
 				self.db.global.ShowPepe = not self.db.global.ShowPepe;
 				if(self.db.global.ShowPepe) then
@@ -380,20 +380,20 @@ function A:GetPrimaryMenuData()
 			text = "Pet Utility", isTitle = true, notCheckable = true,
 		},
 		{
-			text = "Hide Utility Menu",
-			func = function() self.db.global.PetUtilityMenuState = 0; A:RestoreSavedSettings(); end,
+			text = "Hide utility menu",
+			func = function() self.db.global.PetUtilityMenuState = 0; addon:RestoreSavedSettings(); end,
 			checked = function() return self.db.global.PetUtilityMenuState == 0 end,
 			disabled = C_PetBattles.IsInBattle(),
 		},
 		{
-			text = "Show Pet Related Items",
-			func = function() self.db.global.PetUtilityMenuState = 1; A:RestoreSavedSettings(); end,
+			text = "Show pet related items",
+			func = function() self.db.global.PetUtilityMenuState = 1; addon:RestoreSavedSettings(); end,
 			checked = function() return self.db.global.PetUtilityMenuState == 1 end,
 			disabled = C_PetBattles.IsInBattle(),
 		},
 		{
-			text = "Show Pet Loadouts Menu",
-			func = function() self.db.global.PetUtilityMenuState = 2; A:RestoreSavedSettings(); end,
+			text = "Show pet loadouts menu",
+			func = function() self.db.global.PetUtilityMenuState = 2; addon:RestoreSavedSettings(); end,
 			checked = function() return self.db.global.PetUtilityMenuState == 2 end,
 			disabled = C_PetBattles.IsInBattle(),
 		},
@@ -404,25 +404,25 @@ function A:GetPrimaryMenuData()
 			text = "Frame Options", isTitle = true, notCheckable = true, disabled = true,
 		},
 		{
-			text = string.format("Change Scale (%d%%)", self.db.global.WindowScale * 100),
+			text = string.format("Change scale (%d%%)", self.db.global.WindowScale * 100),
 			notCheckable = true,
 			hasArrow = true,
-			menuList = A:GetWindowScaleMenu(),
+			menuList = addon:GetWindowScaleMenu(),
 		},
 		{
-			text = "Font Face",
+			text = "Font face",
 			notCheckable = true,
 			hasArrow = true,
 			menuList = sharedMediaFonts,
 		},
 		{
-			text = "Font Size",
+			text = "Font size",
 			notCheckable = true,
 			hasArrow = true,
 			menuList = fontSizes,
 		},
 		{
-			text = "Bar Texture",
+			text = "Bar texture",
 			notCheckable = true,
 			hasArrow = true,
 			menuList = sharedMediaBarTextures,
@@ -456,16 +456,16 @@ function A:GetPrimaryMenuData()
 	return data;
 end
 
-function A:OpenContextMenu(contextMenuData, parentframe, anchor, point, relativePoint)
+function addon:OpenContextMenu(contextMenuData, parentframe, anchor, point, relativePoint)
 	
-	if(not A.ContextMenu) then
-		A.ContextMenu = CreateFrame("Frame", "PetBuddyContextMenuFrame", PetBuddyFrame, "UIDropDownMenuTemplate");
+	if(not addon.ContextMenu) then
+		addon.ContextMenu = CreateFrame("Frame", "PetBuddyContextMenuFrame", PetBuddyFrame, "UIDropDownMenuTemplate");
 	end
 	
 	if(not contextMenuData) then
-		contextMenuData = A:GetPrimaryMenuData();
+		contextMenuData = addon:GetPrimaryMenuData();
 	end
 	
-	A.ContextMenu:SetPoint(point or "TOPLEFT", parentframe or PetBuddyFrame, relativePoint or "CENTER", 0, 5);
-	EasyMenu(contextMenuData, A.ContextMenu, anchor or "cursor", 0, 0, "MENU", 5);
+	addon.ContextMenu:SetPoint(point or "TOPLEFT", parentframe or PetBuddyFrame, relativePoint or "CENTER", 0, 5);
+	EasyMenu(contextMenuData, addon.ContextMenu, anchor or "cursor", 0, 0, "MENU", 5);
 end

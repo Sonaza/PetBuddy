@@ -1,5 +1,6 @@
 /media_psd
 /misc
+*.sublime*
 
 # Windows image file caches
 Thumbs.db

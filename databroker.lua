@@ -6,8 +6,8 @@
 	Questions can be sent to temu92@gmail.com
 --]]
 
-local ADDON_NAME, SHARED_DATA = ...;
-local A, E = unpack(SHARED_DATA);
+local ADDON_NAME, addon = ...;
+local E = addon.E;
 
 local LibStub = LibStub;
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1");
@@ -31,16 +31,16 @@ local TEX_PET_CHARM = ICON_PATTERN_12:format("Interface\\ICONS\\ACHIEVEMENT_GUIL
 local PET_TYPE_ICON_PATTERN = "|TInterface\\PetBattles\\PetIcon-%s:16:16:0:0:128:256:102:63:129:168|t";
 
 PET_TYPE_SUFFIX = {
-[1] = "Humanoid",
-[2] = "Dragon",
-[3] = "Flying",
-[4] = "Undead",
-[5] = "Critter",
-[6] = "Magical",
-[7] = "Elemental",
-[8] = "Beast",
-[9] = "Water",
-[10] = "Mechanical",
+	[1] = "Humanoid",
+	[2] = "Dragon",
+	[3] = "Flying",
+	[4] = "Undead",
+	[5] = "Critter",
+	[6] = "Magical",
+	[7] = "Elemental",
+	[8] = "Beast",
+	[9] = "Water",
+	[10] = "Mechanical",
 };
 
 local BATTLE_PET_COUNTERS = { -- Weak / Strong
@@ -56,20 +56,20 @@ local BATTLE_PET_COUNTERS = { -- Weak / Strong
 	[10] = {7, 6}, -- Mechanical
 }
 
-function A:GetDatabrokerMenuData()
+function addon:GetDatabrokerMenuData()
 	return {
 		{
 			text = "Pet Buddy", isTitle = true, notCheckable = true,
 		},
 		{
-			text = "Show Wounded Pets",
-			func = function() self.db.global.Broker.ShowWoundedPets = not self.db.global.Broker.ShowWoundedPets; A:UpdateDatabrokerText() end,
+			text = "Show wounded pets",
+			func = function() self.db.global.Broker.ShowWoundedPets = not self.db.global.Broker.ShowWoundedPets; addon:UpdateDatabrokerText() end,
 			checked = function() return self.db.global.Broker.ShowWoundedPets; end,
 			isNotRadio = true,
 		},
 		{
-			text = "Show Pet Charms",
-			func = function() self.db.global.Broker.ShowPetCharms = not self.db.global.Broker.ShowPetCharms; A:UpdateDatabrokerText() end,
+			text = "Show pet charms",
+			func = function() self.db.global.Broker.ShowPetCharms = not self.db.global.Broker.ShowPetCharms; addon:UpdateDatabrokerText() end,
 			checked = function() return self.db.global.Broker.ShowPetCharms; end,
 			isNotRadio = true,
 		},
@@ -77,8 +77,8 @@ function A:GetDatabrokerMenuData()
 			text = "", isTitle = true, notCheckable = true, disabled = true,
 		},
 		{
-			text = "Always Resummon Companion Pet",
-			func = function() self.db.global.AutoSummonPet = not self.db.global.AutoSummonPet; A:UpdateDatabrokerText(); end,
+			text = "Always resummon companion",
+			func = function() self.db.global.AutoSummonPet = not self.db.global.AutoSummonPet; addon:UpdateDatabrokerText(); end,
 			checked = function() return self.db.global.AutoSummonPet; end,
 			isNotRadio = true,
 			hasArrow = true,
@@ -87,18 +87,18 @@ function A:GetDatabrokerMenuData()
 					text = "Resummon Options", isTitle = true, notCheckable = true,
 				},
 				{
-					text = "Last Used Pet",
-					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.LAST_PET; A:UpdateAutoResummon(true); end,
+					text = "Last used pet",
+					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.LAST_PET; addon:UpdateAutoResummon(true); end,
 					checked = function() return self.db.global.AutoSummonMode == E.AUTO_SUMMON_MODE.LAST_PET; end,
 				},
 				{
-					text = "Random Favorite Pet",
-					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.FAVORITE; A:UpdateAutoResummon(true); end,
+					text = "Random favorite pet",
+					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.FAVORITE; addon:UpdateAutoResummon(true); end,
 					checked = function() return self.db.global.AutoSummonMode == E.AUTO_SUMMON_MODE.FAVORITE; end,
 				},
 				{
-					text = "Any Random Pet",
-					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.ANY; A:UpdateAutoResummon(true); end,
+					text = "Any random pet",
+					func = function() self.db.global.AutoSummonMode = E.AUTO_SUMMON_MODE.ANY; addon:UpdateAutoResummon(true); end,
 					checked = function() return self.db.global.AutoSummonMode == E.AUTO_SUMMON_MODE.ANY; end,
 				},
 			},
@@ -110,13 +110,13 @@ function A:GetDatabrokerMenuData()
 			text = "Pet Buddy Options",
 			notCheckable = true,
 			hasArrow = true,
-			menuList = A:GetPrimaryMenuData(),
+			menuList = addon:GetPrimaryMenuData(),
 		},
 	};
 end
 
-function A:InitializeDatabroker()
-	A.databroker = LDB:NewDataObject(ADDON_NAME, {
+function addon:InitializeDatabroker()
+	addon.databroker = LDB:NewDataObject(ADDON_NAME, {
 		type = "data source",
 		label = "Pet Buddy",
 		text = "Pet Buddy",
@@ -126,7 +126,7 @@ function A:InitializeDatabroker()
 				TogglePetBuddy();
 			elseif(button == "RightButton") then
 				GameTooltip:Hide();
-				A:OpenContextMenu(A:GetDatabrokerMenuData(), frame, frame, "BOTTOM", "BOTTOM");
+				addon:OpenContextMenu(addon:GetDatabrokerMenuData(), frame, frame, "BOTTOM", "BOTTOM");
 			end
 		end,
 		OnTooltipShow = function(tooltip)
@@ -194,11 +194,11 @@ function A:InitializeDatabroker()
 			end
 				tooltip:AddLine(" ");
 			
-			if(A.db.global.AutoSummonPet) then
-				if(A.db.char.AutoSummonLastPetID) then
-					local speciesID, customName, level, _, _, _, _, speciesName = C_PetJournal.GetPetInfoByPetID(A.db.char.AutoSummonLastPetID);
+			if(addon.db.global.AutoSummonPet) then
+				if(addon.db.char.AutoSummonLastPetID) then
+					local speciesID, customName, level, _, _, _, _, speciesName = C_PetJournal.GetPetInfoByPetID(addon.db.char.AutoSummonLastPetID);
 					if(speciesID) then
-						local _, _, _, _, rarity = C_PetJournal.GetPetStats(A.db.char.AutoSummonLastPetID);
+						local _, _, _, _, rarity = C_PetJournal.GetPetStats(addon.db.char.AutoSummonLastPetID);
 						local rarityColor = ITEM_QUALITY_COLORS[rarity-1];
 						
 						tooltip:AddDoubleLine("Current Auto Summon Companion", string.format("%s[%d] %s|r", rarityColor.hex, level, customName or speciesName));
@@ -215,30 +215,30 @@ function A:InitializeDatabroker()
 			tooltip:AddLine("Left-Click |cffffffffToggle Pet Buddy|h");
 			tooltip:AddLine("Right-Click |cffffffffShow options|h");
 			
-			-- A.tooltip_open = true;
+			-- addon.tooltip_open = true;
 		end,
 		OnLeave = function(frame)
-			-- A.tooltip_open = false;
+			-- addon.tooltip_open = false;
 		end,
 	});
 
-	A:UpdateDatabrokerText();
+	addon:UpdateDatabrokerText();
 end
 
-function A:UpdateDatabrokerText()
-	if(not A.databroker) then return end
+function addon:UpdateDatabrokerText()
+	if(not addon.databroker) then return end
 	
 	local strings = {};
 	
 	if(self.db.global.Broker.ShowWoundedPets) then
-		local woundedPets = A:GetNumWoundedPets();
+		local woundedPets = addon:GetNumWoundedPets();
 		
 		if(woundedPets > 0) then
 			tinsert(strings, string.format("%d |cffff5555wounded|r", woundedPets));
 		end
 	end
 	
-	if(A.db.global.AutoSummonPet and not self.db.char.AutoSummonLastPetID) then
+	if(addon.db.global.AutoSummonPet and not self.db.char.AutoSummonLastPetID) then
 		tinsert(strings, string.format("|cffff5555No companion|r", woundedPets));
 	end
 	
@@ -251,5 +251,5 @@ function A:UpdateDatabrokerText()
 		tinsert(strings, "Pet Buddy");
 	end
 	
-	A.databroker.text = table.concat(strings, "  ");
+	addon.databroker.text = table.concat(strings, "  ");
 end

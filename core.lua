@@ -6,17 +6,12 @@
 	Questions can be sent to temu92@gmail.com
 --]]
 
-local ADDON_NAME, SHARED_DATA = ...;
+local ADDON_NAME = ...;
+local addon = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), ADDON_NAME, "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0");
+_G[ADDON_NAME] = addon;
 
-local _G = getfenv(0);
-
-local LibStub = LibStub;
-local A = LibStub("AceAddon-3.0"):NewAddon(ADDON_NAME, "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0");
-_G[ADDON_NAME] = A;
-SHARED_DATA[1] = A;
-
-local E = {};
-SHARED_DATA[2] = E;
+addon.E = {};
+local E = addon.E;
 
 BINDING_HEADER_PETBUDDY = "Pet Buddy";
 _G["BINDING_NAME_CLICK PetBuddyFrameToggler:LeftButton"] = "Toggle Pet Buddy";
@@ -26,13 +21,13 @@ _G["BINDING_NAME_PETBUDDY_SEARCH_LOADOUTS"] = "Search Pet Loadouts";
 
 local PetsBattleData = {};
 
-function A:OnEnable()
+function addon:OnEnable()
 	LoadAddOn("Blizzard_PetJournal");
 	
-	A.SecureFrameToggler = CreateFrame("Button", "PetBuddyFrameToggler", nil, "SecureHandlerClickTemplate");
-	A.SecureFrameToggler:SetFrameRef("PetBuddyFrame", PetBuddyFrame);
+	addon.SecureFrameToggler = CreateFrame("Button", "PetBuddyFrameToggler", nil, "SecureHandlerClickTemplate");
+	addon.SecureFrameToggler:SetFrameRef("PetBuddyFrame", PetBuddyFrame);
 	
-	A.SecureFrameToggler:SetAttribute("_onclick", [[
+	addon.SecureFrameToggler:SetAttribute("_onclick", [[
 		local frame = self:GetFrameRef("PetBuddyFrame");
 		if(frame:IsShown()) then
 			frame:Hide();
@@ -41,67 +36,67 @@ function A:OnEnable()
 		end
 	]]);
 	
-	A.LoginTime = GetTime();
-	A.PetHealTime = 0;
+	addon.LoginTime = GetTime();
+	addon.PetHealTime = 0;
 	
-	A:RegisterEvent("PET_BATTLE_OPENING_START");
-	A:RegisterEvent("PET_BATTLE_CLOSE");
+	addon:RegisterEvent("PET_BATTLE_OPENING_START");
+	addon:RegisterEvent("PET_BATTLE_CLOSE");
 	
-	A:RegisterEvent("PET_BATTLE_PET_CHANGED", A.UpdatePets);
-	A:RegisterEvent("PET_BATTLE_HEALTH_CHANGED", A.UpdatePets);
-	A:RegisterEvent("PET_BATTLE_LEVEL_CHANGED", A.UpdatePets);
-	A:RegisterEvent("PET_BATTLE_XP_CHANGED", A.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_PET_CHANGED", addon.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_HEALTH_CHANGED", addon.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_LEVEL_CHANGED", addon.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_XP_CHANGED", addon.UpdatePets);
 	
-	A:RegisterEvent("PET_JOURNAL_NEW_BATTLE_SLOT", A.UpdatePets);
+	addon:RegisterEvent("PET_JOURNAL_NEW_BATTLE_SLOT", addon.UpdatePets);
 	
-	A:RegisterEvent("UPDATE_SUMMONPETS_ACTION", A.UpdatePets);
-	A:RegisterEvent("PET_JOURNAL_LIST_UPDATE", A.UpdatePets);
+	addon:RegisterEvent("UPDATE_SUMMONPETS_ACTION", addon.UpdatePets);
+	addon:RegisterEvent("PET_JOURNAL_LIST_UPDATE", addon.UpdatePets);
 	
-	-- A:RegisterEvent("PLAYER_ENTERING_WORLD");
-	A:RegisterEvent("ZONE_CHANGED");
-	A:RegisterEvent("SPELL_UPDATE_COOLDOWN");
+	-- addon:RegisterEvent("PLAYER_ENTERING_WORLD");
+	addon:RegisterEvent("ZONE_CHANGED");
+	addon:RegisterEvent("SPELL_UPDATE_COOLDOWN");
 	
-	A:RegisterEvent("CURSOR_UPDATE");
+	addon:RegisterEvent("CURSOR_UPDATE");
 	
-	A:RegisterEvent("PLAYER_REGEN_DISABLED");
-	A:RegisterEvent("PLAYER_REGEN_ENABLED");
+	addon:RegisterEvent("PLAYER_REGEN_DISABLED");
+	addon:RegisterEvent("PLAYER_REGEN_ENABLED");
 	
 	
-	A:RegisterEvent("GOSSIP_SHOW");
-	A:RegisterEvent("GOSSIP_CLOSED");
-	A:RegisterEvent("GOSSIP_CONFIRM");
+	addon:RegisterEvent("GOSSIP_SHOW");
+	addon:RegisterEvent("GOSSIP_CLOSED");
+	addon:RegisterEvent("GOSSIP_CONFIRM");
 	
-	A:RegisterEvent("BARBER_SHOP_OPEN");
-	A:RegisterEvent("BARBER_SHOP_CLOSE");
+	addon:RegisterEvent("BARBER_SHOP_OPEN");
+	addon:RegisterEvent("BARBER_SHOP_CLOSE");
 	
-	A:UpdatePets();
+	addon:UpdatePets();
 	
-	A:ScheduleRepeatingTimer(function()
-		if(not A.BlizzHooked and PetJournal_UpdatePetLoadOut) then
+	addon:ScheduleRepeatingTimer(function()
+		if(not addon.BlizzHooked and PetJournal_UpdatePetLoadOut) then
 			hooksecurefunc("PetJournal_UpdatePetLoadOut", function()
 				if(not C_PetBattles.IsInBattle()) then
-					A:UpdatePets();
+					addon:UpdatePets();
 				end
 			end);
-			A.BlizzHooked = true;
+			addon.BlizzHooked = true;
 		end
 		
-		A:UpdateAutoResummon();
+		addon:UpdateAutoResummon();
 		
-		if(GossipFrame:IsShown() and A.PetHealer.IsGarrisonNPC) then
-			A:UpdateWoundedText();
+		if(GossipFrame:IsShown() and addon.PetHealer.IsGarrisonNPC) then
+			addon:UpdateWoundedText();
 		end
 	end, 1.0);
 end
 
 function PetBuddySetUtility(utility_id)
-	if(not A or not A.db) then return end
+	if(not addon or not addon.db) then return end
 	if(InCombatLockdown()) then return end
 	
 	PetBuddyFrame:Show();
 	
-	A.db.global.PetUtilityMenuState = utility_id or 0;
-	A:UpdateUtilityMenuState();
+	addon.db.global.PetUtilityMenuState = utility_id or 0;
+	addon:UpdateUtilityMenuState();
 end
 
 function PetBuddyFocusSearch()
@@ -148,23 +143,23 @@ function PetBuddyPetFrame_OnClick(self, button)
 		PetBuddyFrame.spellSelect:Hide();
 		
 	elseif(button == "RightButton") then
-		A:OpenContextMenu();
+		addon:OpenContextMenu();
 	end
 end
 
-function A:UpdateUtilityMenuState()
+function addon:UpdateUtilityMenuState()
 	if(InCombatLockdown()) then return end
 	
-	if(A.db.global.PetUtilityMenuState < 0 or A.db.global.PetUtilityMenuState > 2) then
-		A.db.global.PetUtilityMenuState = 0;
+	if(addon.db.global.PetUtilityMenuState < 0 or addon.db.global.PetUtilityMenuState > 2) then
+		addon.db.global.PetUtilityMenuState = 0;
 	end
 	
-	if(A.db.global.PetUtilityMenuState == 1) then
+	if(addon.db.global.PetUtilityMenuState == 1) then
 		PetBuddyFrameButtons:Show();
 		PetBuddyFrameLoadouts:Hide();
-		A:UpdateItemButtons();
+		addon:UpdateItemButtons();
 		
-	elseif(A.db.global.PetUtilityMenuState == 2) then
+	elseif(addon.db.global.PetUtilityMenuState == 2) then
 		PetBuddyFrameButtons:Hide();
 		PetBuddyFrameLoadouts:Show();
 		PetBuddyFrameLoadouts_UpdateList();
@@ -179,15 +174,15 @@ end
 function PetBuddyFrame_OnMouseWheel(self, delta)
 	if(InCombatLockdown() or C_PetBattles.IsInBattle()) then return end
 	
-	local menuState = A.db.global.PetUtilityMenuState;
+	local menuState = addon.db.global.PetUtilityMenuState;
 	
 	menuState = menuState - delta;
 	if(menuState > 2) then menuState = 0; end
 	if(menuState < 0) then menuState = 2; end
 	
-	A.db.global.PetUtilityMenuState = menuState;
+	addon.db.global.PetUtilityMenuState = menuState;
 	
-	A:UpdateUtilityMenuState();
+	addon:UpdateUtilityMenuState();
 	
 	CloseMenus();
 end
@@ -303,7 +298,7 @@ function PetBuddyFrame_ShowPetSelect(self)
 	PetBuddyFrame.spellSelect.currentAnchor = self;
 end
 
-function A:UpdatePetAbility(abilityFrame, abilityID, petID)
+function addon:UpdatePetAbility(abilityFrame, abilityID, petID)
 	local speciesID, customName, level, xp, maxXp, displayID, isFavorite, petName, petIcon, petType = C_PetJournal.GetPetInfoByPetID(petID);
 	local requiredLevel = PetBuddyFrame_GetRequiredLevel(abilityFrame:GetParent():GetParent(), abilityID);
 	
@@ -327,7 +322,7 @@ function A:UpdatePetAbility(abilityFrame, abilityID, petID)
 	end
 end
 
-function A:UpdateBattleData()
+function addon:UpdateBattleData()
 	local index = 1;
 	
 	wipe(PetsBattleData);
@@ -348,55 +343,55 @@ function A:UpdateBattleData()
 	end
 end
 
-function A:PET_BATTLE_OPENING_START()
+function addon:PET_BATTLE_OPENING_START()
 	if(self.db.global.PetBattleVisiblityMode == E.VISIBILITY_MODE.SHOW and not PetBuddyFrame:IsShown()) then
 		PetBuddyFrame:Show();
-		A.BattleVisibilityChange = true;
+		addon.BattleVisibilityChange = true;
 	elseif(self.db.global.PetBattleVisiblityMode == E.VISIBILITY_MODE.HIDE and PetBuddyFrame:IsShown()) then
 		PetBuddyFrame:Hide();
-		A.BattleVisibilityChange = true;
+		addon.BattleVisibilityChange = true;
 	end
 	
-	A.UtilityMenu = self.db.global.PetUtilityMenuState;
+	addon.UtilityMenu = self.db.global.PetUtilityMenuState;
 	self.db.global.PetUtilityMenuState = 0;
-	A:UpdateUtilityMenuState();
+	addon:UpdateUtilityMenuState();
 	
-	A:UpdateNumWoundedPets();
+	addon:UpdateNumWoundedPets();
 	
-	A:UpdateBattleData();
-	A:UpdatePets();
+	addon:UpdateBattleData();
+	addon:UpdatePets();
 end
 
-function A:PET_BATTLE_CLOSE()
-	if(A.BattleVisibilityChange) then
+function addon:PET_BATTLE_CLOSE()
+	if(addon.BattleVisibilityChange) then
 		if(self.db.global.PetBattleVisiblityMode == E.VISIBILITY_MODE.SHOW) then
 			PetBuddyFrame:Hide();
 		elseif(self.db.global.PetBattleVisiblityMode == E.VISIBILITY_MODE.HIDE) then
 			PetBuddyFrame:Show();
 		end
 		
-		A.BattleVisibilityChange = false;
+		addon.BattleVisibilityChange = false;
 	end
 	
-	if(self.db.global.PetUtilityMenuState == 0 and A.UtilityMenu) then
-		self.db.global.PetUtilityMenuState = A.UtilityMenu;
-		A.UtilityMenu = nil;
-		A:UpdateUtilityMenuState();
+	if(self.db.global.PetUtilityMenuState == 0 and addon.UtilityMenu) then
+		self.db.global.PetUtilityMenuState = addon.UtilityMenu;
+		addon.UtilityMenu = nil;
+		addon:UpdateUtilityMenuState();
 	end
 	
-	A:UpdatePets();
-	A:UpdateNumWoundedPets();
+	addon:UpdatePets();
+	addon:UpdateNumWoundedPets();
 end
 
-function A:UpdatePets()
+function addon:UpdatePets()
 	if(InCombatLockdown()) then return end
 	
 	if(not PetsBattleData and C_PetBattles.IsInBattle()) then
-		A:UpdateBattleData();
+		addon:UpdateBattleData();
 	end
 	
 	PetBuddyFrameLoadouts_UpdateList();
-	A:UpdateDatabrokerText();
+	addon:UpdateDatabrokerText();
 	
 	for slotIndex = 1, 3 do
 		local petFrame = _G['PetBuddyFramePet' .. slotIndex];
@@ -428,9 +423,9 @@ function A:UpdatePets()
 				--Read ability/ability levels into the correct tables
 				C_PetJournal.GetPetAbilityList(speciesID, petFrame.petAbilities, petFrame.petAbilityLevels);
 				
-				A:UpdatePetAbility(petFrame.abilities.spell1, ability1, petID);
-				A:UpdatePetAbility(petFrame.abilities.spell2, ability2, petID);
-				A:UpdatePetAbility(petFrame.abilities.spell3, ability3, petID);
+				addon:UpdatePetAbility(petFrame.abilities.spell1, ability1, petID);
+				addon:UpdatePetAbility(petFrame.abilities.spell2, ability2, petID);
+				addon:UpdatePetAbility(petFrame.abilities.spell3, ability3, petID);
 		
 				petFrame.abilities.typeInfo.petID = petID;
 				petFrame.abilities.typeInfo.speciesID = speciesID;
@@ -573,7 +568,7 @@ function A:UpdatePets()
 end
 
 function PetBuddyFrame_StartMoving()
-	if(A.db.global.IsFrameLocked) then return end
+	if(addon.db.global.IsFrameLocked) then return end
 	
 	CloseMenus();
 	
@@ -596,7 +591,7 @@ function PetBuddyFrame_UpdatePetCharms(self)
 	local charmsAmount = GetItemCount(116415);
 	self.text:SetText(charmsAmount);
 	
-	A:UpdateDatabrokerText();
+	addon:UpdateDatabrokerText();
 end
 
 function PetBuddyFrameDragButton_OnClick(self, button)
@@ -678,7 +673,7 @@ function PetBuddyFrameDragButton_OnReceiveDrag(self)
 end
 
 function PetBuddyFrameDragButton_OnEnter(self)
-	if(not A.db.global.ShowPetTooltips) then return end
+	if(not addon.db.global.ShowPetTooltips) then return end
 	
 	-- local slotIndex = self:GetParent():GetID();
 	-- if(not slotIndex) then return end
@@ -703,81 +698,81 @@ end
 
 function PetBuddyFrame_OnClick(self, button, ...)
 	if(button == "RightButton") then
-		A:OpenContextMenu();
+		addon:OpenContextMenu();
 	end
 end
 
 function PetBuddyFrame_OnShow(self)
-	if(not A.db) then return end
+	if(not addon.db) then return end
 	
-	A.db.global.Visible = true;
+	addon.db.global.Visible = true;
 	
-	A:RegisterEvent("PET_BATTLE_PET_CHANGED", A.UpdatePets);
-	A:RegisterEvent("PET_BATTLE_HEALTH_CHANGED", A.UpdatePets);
-	A:RegisterEvent("PET_BATTLE_LEVEL_CHANGED", A.UpdatePets);
-	A:RegisterEvent("PET_BATTLE_XP_CHANGED", A.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_PET_CHANGED", addon.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_HEALTH_CHANGED", addon.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_LEVEL_CHANGED", addon.UpdatePets);
+	addon:RegisterEvent("PET_BATTLE_XP_CHANGED", addon.UpdatePets);
 	
-	A:RegisterEvent("PET_JOURNAL_NEW_BATTLE_SLOT", A.UpdatePets);
+	addon:RegisterEvent("PET_JOURNAL_NEW_BATTLE_SLOT", addon.UpdatePets);
 	
-	A:RegisterEvent("UPDATE_SUMMONPETS_ACTION", A.UpdatePets);
-	A:RegisterEvent("PET_JOURNAL_LIST_UPDATE", A.UpdatePets);
+	addon:RegisterEvent("UPDATE_SUMMONPETS_ACTION", addon.UpdatePets);
+	addon:RegisterEvent("PET_JOURNAL_LIST_UPDATE", addon.UpdatePets);
 	
-	A:RefreshMedia();
+	addon:RefreshMedia();
 	
 	PetBuddyPetFrame_ResetAbilitySwitches();
 	PetBuddyFrame_UpdatePetCharms(PetBuddyFrameTitlePetCharms);
 end
 
 function PetBuddyFrame_OnHide(self)
-	if(not A.db) then return end
+	if(not addon.db) then return end
 	
 	-- if(InCombatLockdown()) then
-		A.db.global.Visible = false;
+		addon.db.global.Visible = false;
 	-- end
 	
-	A:UnregisterEvent("PET_BATTLE_PET_CHANGED");
-	A:UnregisterEvent("PET_BATTLE_HEALTH_CHANGED");
-	A:UnregisterEvent("PET_BATTLE_LEVEL_CHANGED");
-	A:UnregisterEvent("PET_BATTLE_XP_CHANGED");
+	addon:UnregisterEvent("PET_BATTLE_PET_CHANGED");
+	addon:UnregisterEvent("PET_BATTLE_HEALTH_CHANGED");
+	addon:UnregisterEvent("PET_BATTLE_LEVEL_CHANGED");
+	addon:UnregisterEvent("PET_BATTLE_XP_CHANGED");
 	
-	A:UnregisterEvent("PET_JOURNAL_NEW_BATTLE_SLOT");
+	addon:UnregisterEvent("PET_JOURNAL_NEW_BATTLE_SLOT");
 	
-	A:UnregisterEvent("UPDATE_SUMMONPETS_ACTION");
-	A:UnregisterEvent("PET_JOURNAL_LIST_UPDATE");
+	addon:UnregisterEvent("UPDATE_SUMMONPETS_ACTION");
+	addon:UnregisterEvent("PET_JOURNAL_LIST_UPDATE");
 end
 
-function A:PLAYER_REGEN_DISABLED()
+function addon:PLAYER_REGEN_DISABLED()
 	if(self.db.global.HideInCombat and PetBuddyFrame:IsShown()) then
 		PetBuddyFrame:Hide();
-		A.CombatHidden = true;
+		addon.CombatHidden = true;
 	end
 end
 
-function A:PLAYER_REGEN_ENABLED()
+function addon:PLAYER_REGEN_ENABLED()
 	if(self.db.global.HideInCombat and self.CombatHidden) then
 		PetBuddyFrame:Show();
-		A.CombatHidden = false;
+		addon.CombatHidden = false;
 	end
 	
 	self.db.global.Visible = PetBuddyFrame:IsShown();
-	A:UpdateUtilityMenuState();
+	addon:UpdateUtilityMenuState();
 end
 
-function A:CURSOR_UPDATE()
+function addon:CURSOR_UPDATE()
 	if(C_PetBattles.IsInBattle()) then return end
 	
-	A.CursorUpdateTimer = A:ScheduleTimer(function()
-		local lastCursor = A.CurrentCursor;
-		A.CurrentCursor = GetCursorInfo();
+	addon.CursorUpdateTimer = addon:ScheduleTimer(function()
+		local lastCursor = addon.CurrentCursor;
+		addon.CurrentCursor = GetCursorInfo();
 		
-		if(not A.CursorTimerTick) then A.CursorTimerTick = 0 end
-		A.CursorTimerTick = A.CursorTimerTick + 1;
+		if(not addon.CursorTimerTick) then addon.CursorTimerTick = 0 end
+		addon.CursorTimerTick = addon.CursorTimerTick + 1;
 		
 		local cancelTimer = false;
-		if(A.CursorTimerTick >= 30) then cancelTimer = true; end
+		if(addon.CursorTimerTick >= 30) then cancelTimer = true; end
 		
-		if(A.CurrentCursor ~= lastCursor) then
-			if(A.CurrentCursor == "battlepet") then
+		if(addon.CurrentCursor ~= lastCursor) then
+			if(addon.CurrentCursor == "battlepet") then
 				for i=1,3 do
 					local button = _G['PetBuddyFramePet'..i..'DragButton'];
 					button:GetParent().glowHighlight:Show();
@@ -789,48 +784,48 @@ function A:CURSOR_UPDATE()
 				end
 			end
 			
-			A.CursorTimerTick = 0;
+			addon.CursorTimerTick = 0;
 			cancelTimer = true;
 		end
 		
-		if(cancelTimer) then A:CancelTimer(A.CursorUpdateTimer); end
+		if(cancelTimer) then addon:CancelTimer(addon.CursorUpdateTimer); end
 	end, 0.01);
 end
 
-A.SummonDisabledTimer = 0;
+addon.SummonDisabledTimer = 0;
 hooksecurefunc("Dismount", function()
-	A.SummonDisabledTimer = GetTime();
+	addon.SummonDisabledTimer = GetTime();
 end)
 
-function A:ZONE_CHANGED()
-	A.SummonDisabledTimer = GetTime();
+function addon:ZONE_CHANGED()
+	addon.SummonDisabledTimer = GetTime();
 end
 
-function A:IsPlayerEating()
+function addon:IsPlayerEating()
 	-- Find localized name for the food/drink buff, there are too many buff ids to manually check
 	local localizedFood = GetSpellInfo(33264);
 	local localizedDrink = GetSpellInfo(160599);
 	return UnitBuff("player", localizedFood) ~= nil or UnitBuff("player", localizedDrink) ~= nil;
 end
 
-function A:CanSafelySummonPet()
+function addon:CanSafelySummonPet()
 	return not (not HasFullControl() or UnitOnTaxi("player") 
 				or UnitUsingVehicle("player") or UnitIsDeadOrGhost("player")
-				or A.BarberShopOpen
-				or IsMounted() or IsFalling() or (GetTime()-A.SummonDisabledTimer) < 15.0
-				or (GetTime()-A.LoginTime) < 15.0
+				or addon.BarberShopOpen
+				or IsMounted() or IsFalling() or (GetTime()-addon.SummonDisabledTimer) < 15.0
+				or (GetTime()-addon.LoginTime) < 15.0
 				or UnitCastingInfo("player") ~= nil or UnitChannelInfo("player") ~= nil
 				or IsStealthed()
-				or A:IsPlayerEating());
+				or addon:IsPlayerEating());
 end
 
-function A:UpdateAutoResummon(forceSummon)
-	if(not A:CanSafelySummonPet() and not forceSummon) then return end
+function addon:UpdateAutoResummon(forceSummon)
+	if(not addon:CanSafelySummonPet() and not forceSummon) then return end
 	
 	local summonedPet = C_PetJournal.GetSummonedPetGUID();
 	if(summonedPet and self.db.char.AutoSummonLastPetID ~= summonedPet) then
 		self.db.char.AutoSummonLastPetID = summonedPet;
-		A:UpdateDatabrokerText();
+		addon:UpdateDatabrokerText();
 	end
 	
 	if(InCombatLockdown() or not self.db.global.AutoSummonPet or (summonedPet and not forceSummon)) then return end
@@ -855,19 +850,19 @@ function A:UpdateAutoResummon(forceSummon)
 	
 	if(petID and petID ~= summonedPet) then
 		C_PetJournal.SummonPetByGUID(petID);
-		A.SummonDisabledTimer = GetTime();
+		addon.SummonDisabledTimer = GetTime();
 	end
 end
 
-function A:PLAYER_ENTERING_WORLD()
+function addon:PLAYER_ENTERING_WORLD()
 	
 end
 
-function A:SPELL_UPDATE_COOLDOWN()
-	A.PetHealTime = GetSpellCooldown(125439);
+function addon:SPELL_UPDATE_COOLDOWN()
+	addon.PetHealTime = GetSpellCooldown(125439);
 	
-	if((GetTime() - A.LoginTime) > 3 or A.PetHealTime > 0) then
-		A:UnregisterEvent("SPELL_UPDATE_COOLDOWN");
+	if((GetTime() - addon.LoginTime) > 3 or addon.PetHealTime > 0) then
+		addon:UnregisterEvent("SPELL_UPDATE_COOLDOWN");
 	end
 end
 
@@ -883,28 +878,28 @@ function TogglePetBuddy()
 		PetBuddyFrame:Show();
 	end
 	
-	A.db.global.Visible = PetBuddyFrame:IsShown();
+	addon.db.global.Visible = PetBuddyFrame:IsShown();
 end
 	
-function A:OnInitialize()
+function addon:OnInitialize()
 	SLASH_PETBUDDY1	= "/pb";
 	SLASH_PETBUDDY2	= "/petbuddy";
 	SlashCmdList["PETBUDDY"] = function(command)
 		TogglePetBuddy();
 	end
 	
-	A:InitializeDatabase();
-	A:InitializeDatabroker();
+	addon:InitializeDatabase();
+	addon:InitializeDatabroker();
 end
 
-function A:BARBER_SHOP_OPEN()
-	A.BarberShopOpen = true;
+function addon:BARBER_SHOP_OPEN()
+	addon.BarberShopOpen = true;
 end
 
-function A:BARBER_SHOP_CLOSE()
-	A.BarberShopOpen = false;
+function addon:BARBER_SHOP_CLOSE()
+	addon.BarberShopOpen = false;
 end
 
-function A:OnDisable()
+function addon:OnDisable()
 		
 end

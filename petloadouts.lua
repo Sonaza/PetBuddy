@@ -6,8 +6,7 @@
 	Questions can be sent to temu92@gmail.com
 --]]
 
-local ADDON_NAME, SHARED_DATA = ...;
-local A = unpack(SHARED_DATA);
+local ADDON_NAME, addon = ...;
 
 local PETBUDDY_LOADOUT_TEXT = "Enter a name for current pet loadout:|n|n%s";
 local CURRENT_LOADOUT_NAME = nil;
@@ -35,11 +34,11 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_SAVE_EXISTS"] = {
 	OnAccept = function(self)
 		local data = self.data;
 		if(data.newSave) then
-			A:DeleteLoadout(data.name);
-			A:SaveLoadout(data.name);
+			addon:DeleteLoadout(data.name);
+			addon:SaveLoadout(data.name);
 		else
-			A:DeleteLoadout(data.name);
-			A:RenameLoadout(data.oldName, data.name);
+			addon:DeleteLoadout(data.name);
+			addon:RenameLoadout(data.oldName, data.name);
 		end
 	end,
 	timeout = 0,
@@ -53,8 +52,8 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_OVERWRITE"] = {
 	button2 = NO,
 	OnAccept = function(self)
 		local name = self.data;
-		A:DeleteLoadout(name);
-		A:SaveLoadout(name);
+		addon:DeleteLoadout(name);
+		addon:SaveLoadout(name);
 	end,
 	timeout = 0,
 	whileDead = 1,
@@ -66,7 +65,7 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_RESTORE"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self)
-		A:RestoreLoadout(self.data);
+		addon:RestoreLoadout(self.data);
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -79,7 +78,7 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_DELETE"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self)
-		A:DeleteLoadout(self.data);
+		addon:DeleteLoadout(self.data);
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -95,11 +94,11 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_SAVE"] = {
 	maxLetters = 38,
 	OnAccept = function(self)
 		local name = string.trim(self.editBox:GetText());
-		A:SaveLoadout(name);
+		addon:SaveLoadout(name);
 	end,
 	EditBoxOnEnterPressed = function(self)
 		local name = string.trim(self:GetParent().editBox:GetText());
-		A:SaveLoadout(name);
+		addon:SaveLoadout(name);
 		self:GetParent():Hide();
 	end,
 	OnShow = function(self)
@@ -123,11 +122,11 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_RENAME"] = {
 	maxLetters = 38,
 	OnAccept = function(self)
 		local new_name = string.trim(self.editBox:GetText());
-		A:RenameLoadout(self.data, new_name);
+		addon:RenameLoadout(self.data, new_name);
 	end,
 	EditBoxOnEnterPressed = function(self)
 		local new_name = string.trim(self:GetParent().editBox:GetText());
-		A:RenameLoadout(self:GetParent().data, new_name);
+		addon:RenameLoadout(self:GetParent().data, new_name);
 		self:GetParent():Hide();
 	end,
 	OnShow = function(self)
@@ -144,7 +143,7 @@ StaticPopupDialogs["PETBUDDY_LOADOUT_RENAME"] = {
 	hideOnEscape = 1,
 };
 
-function A:GetPetLoadoutText(saved_loadout)
+function addon:GetPetLoadoutText(saved_loadout)
 	local loadoutText = "";
 	for slotIndex = 1, 3 do
 		local petID, ability1, ability2, ability3, locked;
@@ -192,7 +191,7 @@ function A:GetPetLoadoutText(saved_loadout)
 	return loadoutText;
 end
 	
-function A:SaveLoadout(loadout_name)
+function addon:SaveLoadout(loadout_name)
 	if(not loadout_name) then return false end
 	if(loadout_name == "") then return end
 	
@@ -224,7 +223,7 @@ function A:SaveLoadout(loadout_name)
 	CloseMenus();
 end
 
-function A:RestoreLoadout(loadout_name)
+function addon:RestoreLoadout(loadout_name)
 	if(not loadout_name) then return false end
 	if(loadout_name == "") then return end
 	
@@ -255,7 +254,7 @@ function A:RestoreLoadout(loadout_name)
 	PetBuddyFrameLoadoutsSearchBox:ClearFocus();
 end
 
-function A:RenameLoadout(old_loadout_name, new_loadout_name)
+function addon:RenameLoadout(old_loadout_name, new_loadout_name)
 	if(not old_loadout_name or not new_loadout_name) then return false end
 	if(new_loadout_name == "") then return end
 	
@@ -274,7 +273,7 @@ function A:RenameLoadout(old_loadout_name, new_loadout_name)
 	CloseMenus();
 end
 
-function A:DeleteLoadout(loadout_name)
+function addon:DeleteLoadout(loadout_name)
 	if(not loadout_name) then return false end
 	if(loadout_name == "") then return end
 	
@@ -286,9 +285,9 @@ function A:DeleteLoadout(loadout_name)
 	CloseMenus();
 end
 
-function A:GetSortedLoadouts()
+function addon:GetSortedLoadouts()
 	local loadoutData = {};
-	for loadout_name, pets in pairs(A.db.global.SavedLoadouts) do
+	for loadout_name, pets in pairs(addon.db.global.SavedLoadouts) do
 		local searchHit = true;
 		if(PetBuddyFrameLoadouts.filterText ~= "") then
 			searchHit = string.find(string.lower(loadout_name), PetBuddyFrameLoadouts.filterText) ~= nil;
@@ -327,7 +326,7 @@ function A:GetSortedLoadouts()
 	
 	if(#loadoutData == 0) then
 		tinsert(loadoutData, {
-			name = "N/A",
+			name = "N/addon",
 			pets = {},
 			notFound = true,
 		});
@@ -341,7 +340,7 @@ function PetBuddyFrameLoadouts_UpdateList()
 	local offset = HybridScrollFrame_GetOffset(scrollFrame);
 	local buttons = scrollFrame.buttons;
 	
-	local loadoutData, foundLoadouts = A:GetSortedLoadouts();
+	local loadoutData, foundLoadouts = addon:GetSortedLoadouts();
 	
 	local button, index;
 	for i=1, #buttons do
@@ -452,7 +451,7 @@ function PetBuddyLoadoutsButton_OnEnter(self)
 	
 	GameTooltip:AddLine("Loadout: |cffffffff" .. self.data.name .. "|r");
 	GameTooltip:AddLine("|n");
-	GameTooltip:AddLine(A:GetPetLoadoutText(self.data.pets));
+	GameTooltip:AddLine(addon:GetPetLoadoutText(self.data.pets));
 	
 	if(not self.hasMissingPet) then
 		GameTooltip:AddLine("Left-Click |cffffffffRestore this loadout");

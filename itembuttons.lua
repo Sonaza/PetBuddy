@@ -6,8 +6,7 @@
 	Questions can be sent to temu92@gmail.com
 --]]
 
-local ADDON_NAME, SHARED_DATA = ...;
-local A = unpack(SHARED_DATA);
+local ADDON_NAME, addon = ...;
 
 local ITEM_BUTTON_CATEGORIES = {
 	{
@@ -108,7 +107,7 @@ local ITEM_BUTTON_CATEGORIES = {
 	},
 };
 
-function A:CheckSameItems(oldItems, newItems)
+function addon:CheckSameItems(oldItems, newItems)
 	for cid, items in pairs(newItems) do
 		if(not oldItems[cid]) then
 			-- print("Categories are different");
@@ -129,12 +128,12 @@ function A:CheckSameItems(oldItems, newItems)
 	return true;
 end
 
-function A:UpdateItemButtons()
+function addon:UpdateItemButtons()
 	if(InCombatLockdown()) then return end
 	if(not PetBuddyFrame:IsShown()) then return end
 	
-	if(not A.previousItems) then
-		A.previousItems = {};
+	if(not addon.previousItems) then
+		addon.previousItems = {};
 	end
 	
 	local totalItems, extraButtonData = {}, {};
@@ -195,7 +194,7 @@ function A:UpdateItemButtons()
 		end
 	end
 	
-	-- local isSameItems = A:CheckSameItems(A.previousItems, totalItems);
+	-- local isSameItems = addon:CheckSameItems(addon.previousItems, totalItems);
 	
 	-- if(not isSameItems) then
 		for i=1,6 do
@@ -212,12 +211,12 @@ function A:UpdateItemButtons()
 	-- 	-- print("Skipping update because same items");
 	-- end
 	
-	A.previousItems = totalItems;
+	addon.previousItems = totalItems;
 end
 
 function PetBuddyFrameButtons_OnShow(self)
 	self:RegisterEvent("BAG_UPDATE_DELAYED");
-	A:UpdateItemButtons();
+	addon:UpdateItemButtons();
 end
 
 function PetBuddyFrameButtons_OnHide(self)
@@ -226,7 +225,7 @@ end
 
 function PetBuddyFrameButtons_OnEvent(self, event, ...)
 	PetBuddyFlyout_Close();
-	A:UpdateItemButtons();
+	addon:UpdateItemButtons();
 end
 
 function PetBuddyFrameButton_Initialize(self, type, actionData, target)
@@ -445,11 +444,11 @@ function PetBuddyFrameButton_OnEvent(self, event, ...)
 	end
 end
 
--- function A:IsUnusableSpell(spellID)
+-- function addon:IsUnusableSpell(spellID)
 	
 -- end
 
-function A:IsPlayerInCelestialTournament()
+function addon:IsPlayerInCelestialTournament()
 	local name, type, difficulty, _, _, _, _, mapID = GetInstanceInfo();
 	return difficulty == 12 and mapID == 1161;
 end
@@ -461,7 +460,7 @@ function PetBuddyFrameButton_OnEnter(self)
 		GameTooltip:SetSpellByID(self.actionData);
 		
 		if(not IsUsableSpell(self.actionData)) then
-			if(A:IsPlayerInCelestialTournament()) then
+			if(addon:IsPlayerInCelestialTournament()) then
 				GameTooltip:AddLine("Cannot use while in Celestial Tournament.", 1, 0.2, 0.2);
 			else
 				GameTooltip:AddLine("Cannot use right now.", 1, 0.2, 0.2);
@@ -471,7 +470,7 @@ function PetBuddyFrameButton_OnEnter(self)
 		GameTooltip:SetItemByID(self.actionData);
 		
 		if(not IsUsableItem(self.actionData) and GetItemCount(self.actionData) > 0) then
-			if(A:IsPlayerInCelestialTournament()) then
+			if(addon:IsPlayerInCelestialTournament()) then
 				GameTooltip:AddLine("Cannot use while in Celestial Tournament.", 1, 0.2, 0.2);
 			else
 				GameTooltip:AddLine("Cannot use right now.", 1, 0.2, 0.2);
