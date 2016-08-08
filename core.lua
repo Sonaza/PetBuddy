@@ -22,7 +22,7 @@ _G["BINDING_NAME_PETBUDDY_SEARCH_LOADOUTS"] = "Search Pet Loadouts";
 local PetsBattleData = {};
 
 function addon:OnEnable()
-	LoadAddOn("Blizzard_PetJournal");
+	LoadAddOn("Blizzard_Collections");
 	
 	addon.SecureFrameToggler = CreateFrame("Button", "PetBuddyFrameToggler", nil, "SecureHandlerClickTemplate");
 	addon.SecureFrameToggler:SetFrameRef("PetBuddyFrame", PetBuddyFrame);
@@ -52,7 +52,6 @@ function addon:OnEnable()
 	addon:RegisterEvent("UPDATE_SUMMONPETS_ACTION", addon.UpdatePets);
 	addon:RegisterEvent("PET_JOURNAL_LIST_UPDATE", addon.UpdatePets);
 	
-	-- addon:RegisterEvent("PLAYER_ENTERING_WORLD");
 	addon:RegisterEvent("ZONE_CHANGED");
 	addon:RegisterEvent("SPELL_UPDATE_COOLDOWN");
 	
@@ -60,7 +59,6 @@ function addon:OnEnable()
 	
 	addon:RegisterEvent("PLAYER_REGEN_DISABLED");
 	addon:RegisterEvent("PLAYER_REGEN_ENABLED");
-	
 	
 	addon:RegisterEvent("GOSSIP_SHOW");
 	addon:RegisterEvent("GOSSIP_CLOSED");

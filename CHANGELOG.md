@@ -1,3 +1,6 @@
+## 2.0.1
+* Fixed changed Blizzard dependency name.
+
 ## 2.0.0
 * Updated for Legion.
 * Some visual tweaks.
