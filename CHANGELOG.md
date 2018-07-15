@@ -1,3 +1,11 @@
+## 3.0.0
+* Updated for Battle for Azeroth.
+* Fixed PlaySound issue from forever ago. Oops.
+
+## 2.0.2
+* TOC bump for patch 7.2.5.
+* Disabled auto resummon of pet in Winterspring and Un'Goro Crater if doing the mount quest daily.
+
 ## 2.0.1
 * Fixed changed Blizzard dependency name.
 

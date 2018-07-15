@@ -134,7 +134,6 @@
 					HandleModifiedItemClick(PetJournal_GetPetAbilityHyperlink(self.abilityID, self.petID));
 				else
 					C_PetJournal.SetAbility(self.slotIndex, self.abilityIndex, self.abilityID);
-					PlaySound("igMainMenuOptionCheckBoxOn");
 					PetJournal_UpdatePetLoadOut();
 					self:GetParent():Hide();
 				end

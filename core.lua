@@ -22,7 +22,7 @@ _G["BINDING_NAME_PETBUDDY_SEARCH_LOADOUTS"] = "Search Pet Loadouts";
 local PetsBattleData = {};
 
 function addon:OnEnable()
-	LoadAddOn("Blizzard_Collections");
+	securecall("LoadAddOn", "Blizzard_Collections");
 	
 	addon.SecureFrameToggler = CreateFrame("Button", "PetBuddyFrameToggler", nil, "SecureHandlerClickTemplate");
 	addon.SecureFrameToggler:SetFrameRef("PetBuddyFrame", PetBuddyFrame);
@@ -52,7 +52,6 @@ function addon:OnEnable()
 	addon:RegisterEvent("UPDATE_SUMMONPETS_ACTION", addon.UpdatePets);
 	addon:RegisterEvent("PET_JOURNAL_LIST_UPDATE", addon.UpdatePets);
 	
-	addon:RegisterEvent("ZONE_CHANGED");
 	addon:RegisterEvent("SPELL_UPDATE_COOLDOWN");
 	
 	addon:RegisterEvent("CURSOR_UPDATE");
@@ -608,13 +607,11 @@ function PetBuddyFrameDragButton_OnClick(self, button)
 		C_PetJournal.SetPetLoadOutInfo(self:GetParent():GetID(), petID);
 		PetJournal_UpdatePetLoadOut();
 		ClearCursor();
-		PlaySound("igAbilityIconDrop");
 	else
 		local petID = self:GetParent().petID;
 		if(petID) then
 			if(button == "LeftButton" and not C_PetBattles.IsInBattle()) then
 				-- C_PetJournal.PickupPet(petID);
-				-- PlaySound("igAbilityIconPickup");
 				
 			elseif(button == "MiddleButton" and not InCombatLockdown()) then
 				C_PetJournal.SummonPetByGUID(petID);
@@ -637,7 +634,6 @@ function PetBuddyFrameDragButton_OnDragStart(self)
 	
 	if(not C_PetBattles.IsInBattle()) then
 		C_PetJournal.PickupPet(petID);
-		PlaySound("igAbilityIconPickup");
 		
 		CloseMenus();
 	end
@@ -664,7 +660,6 @@ function PetBuddyFrameDragButton_OnReceiveDrag(self)
 		C_PetJournal.SetPetLoadOutInfo(self:GetParent():GetID(), petID);
 		PetJournal_UpdatePetLoadOut();
 		ClearCursor();
-		PlaySound("igAbilityIconDrop");
 	end
 	
 	CloseMenus();
@@ -795,15 +790,33 @@ hooksecurefunc("Dismount", function()
 	addon.SummonDisabledTimer = GetTime();
 end)
 
-function addon:ZONE_CHANGED()
-	addon.SummonDisabledTimer = GetTime();
+local function UnitAuraByNameOrId(unit, aura_name_or_id, filter)
+	for index = 1, 40 do
+		local name, _, _, _, _, _, _, _, _, spell_id = UnitAura(unit, index, filter);
+		if (name == aura_name_or_id or spell_id == aura_name_or_id) then
+			return UnitAura(unit, index, filter);
+		end
+	end
+	return nil;
 end
 
 function addon:IsPlayerEating()
 	-- Find localized name for the food/drink buff, there are too many buff ids to manually check
 	local localizedFood = GetSpellInfo(33264);
 	local localizedDrink = GetSpellInfo(160599);
-	return UnitBuff("player", localizedFood) ~= nil or UnitBuff("player", localizedDrink) ~= nil;
+	return UnitAuraByNameOrId("player", localizedFood) ~= nil or UnitAuraByNameOrId("player", localizedDrink) ~= nil;
+end
+
+local WINTERSPRING_CUB_ID = 68646;
+local WINTERSPRING_MAP_ID = 83;
+local VENOMHIDE_HATCHLING_ID = 46362;
+local UNGORO_MAP_ID = 78;
+
+function addon:IsDoingMountQuest()
+	local checkMapId = nil;
+	if(GetItemCount(WINTERSPRING_CUB_ID)    >= 1) then checkMapId = WINTERSPRING_MAP_ID end
+	if(GetItemCount(VENOMHIDE_HATCHLING_ID) >= 1) then checkMapId = UNGORO_MAP_ID end
+	return checkMapId ~= nil and C_Map.GetBestMapForUnit("player") == checkMapId;
 end
 
 function addon:CanSafelySummonPet()
@@ -814,10 +827,12 @@ function addon:CanSafelySummonPet()
 				or (GetTime()-addon.LoginTime) < 15.0
 				or UnitCastingInfo("player") ~= nil or UnitChannelInfo("player") ~= nil
 				or IsStealthed()
-				or addon:IsPlayerEating());
+				or addon:IsPlayerEating()
+				or addon:IsDoingMountQuest());
 end
 
 function addon:UpdateAutoResummon(forceSummon)
+	if(InCombatLockdown()) then return end
 	if(not addon:CanSafelySummonPet() and not forceSummon) then return end
 	
 	local summonedPet = C_PetJournal.GetSummonedPetGUID();
@@ -826,7 +841,7 @@ function addon:UpdateAutoResummon(forceSummon)
 		addon:UpdateDatabrokerText();
 	end
 	
-	if(InCombatLockdown() or not self.db.global.AutoSummonPet or (summonedPet and not forceSummon)) then return end
+	if(not self.db.global.AutoSummonPet or (summonedPet and not forceSummon)) then return end
 	
 	local petID = nil;
 	
