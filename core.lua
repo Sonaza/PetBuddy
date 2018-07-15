@@ -584,12 +584,56 @@ function PetBuddyFrame_StopMoving()
 	end
 end
 
-function PetBuddyFrame_UpdatePetCharms(self)
-	local charmsAmount = GetItemCount(116415);
-	self.text:SetText(charmsAmount);
+----------------------------
+
+PetBuddy_PetCharmsMixin = {}
+
+function PetBuddy_PetCharmsMixin:OnShow()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD");
+	self:RegisterEvent("BAG_UPDATE_DELAYED");
+end
+
+function PetBuddy_PetCharmsMixin:OnHide()
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
+	self:UnregisterEvent("BAG_UPDATE_DELAYED");
+end
+
+function addon:GetPetCharmsInfo()
+	local charmsItems = {
+		163036, -- Polished Pet Charm
+		116415, -- Shiny Pet Charm
+	};
 	
+	for _, itemID in ipairs(charmsItems) do
+		local amount = GetItemCount(itemID);
+		if (amount and amount > 0) then
+			return itemID, amount;
+		end
+	end
+	return charmsItems[1], 0;
+end
+
+function PetBuddy_PetCharmsMixin:OnEvent(event, ...)
+	local charmsItemID, charmsNumAmount = addon:GetPetCharmsInfo();
+	if (charmsItemID and charmsNumAmount) then
+		self.text:SetText(charmsNumAmount);
+		self.icon:SetTexture(GetItemIcon(charmsItemID));
+	end
 	addon:UpdateDatabrokerText();
 end
+
+function PetBuddy_PetCharmsMixin:OnEnter()
+	local charmsItemID, charmsNumAmount = addon:GetPetCharmsInfo();
+	GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+	GameTooltip:SetItemByID(charmsItemID);
+	GameTooltip:Show();
+end
+
+function PetBuddy_PetCharmsMixin:OnLeave()
+	GameTooltip:Hide();
+end
+
+-------------------------
 
 function PetBuddyFrameDragButton_OnClick(self, button)
 	local type, petID = GetCursorInfo();

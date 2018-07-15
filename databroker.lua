@@ -25,9 +25,6 @@ local TEX_SPEED_ICON = "|TInterface\\PetBattles\\PetBattle-StatIcons:16:16:0:0:3
 local TEX_STRONG_ICON = ICON_PATTERN_16:format("INTERFACE\\PetBattles\\BattleBar-AbilityBadge-Strong-Small");
 local TEX_WEAK_ICON = ICON_PATTERN_16:format("INTERFACE\\PetBattles\\BattleBar-AbilityBadge-Weak-Small");
 
-local PET_CHARM_ID = 116415;
-local TEX_PET_CHARM = ICON_PATTERN_12:format("Interface\\ICONS\\ACHIEVEMENT_GUILDPERK_HONORABLEMENTION");
-
 local PET_TYPE_ICON_PATTERN = "|TInterface\\PetBattles\\PetIcon-%s:16:16:0:0:128:256:102:63:129:168|t";
 
 PET_TYPE_SUFFIX = {
@@ -243,8 +240,9 @@ function addon:UpdateDatabrokerText()
 	end
 	
 	if(self.db.global.Broker.ShowPetCharms) then
-		local charmsAmount = GetItemCount(PET_CHARM_ID);
-		tinsert(strings, string.format("%d %s", charmsAmount, TEX_PET_CHARM));
+		local charmsItemID, charmsNumAmount = addon:GetPetCharmsInfo();
+		local petCharmIconString = ICON_PATTERN_12:format(tostring(GetItemIcon(charmsItemID) or ""));
+		tinsert(strings, string.format("%d %s", charmsNumAmount, petCharmIconString));
 	end
 	
 	if(#strings == 0) then

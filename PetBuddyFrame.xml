@@ -72,14 +72,14 @@
 							</OnLoad>
 						</Scripts>
 					</PlayerModel>
-					<Frame name="$parentPetCharms">
+					<Frame name="$parentPetCharms" mixin="PetBuddy_PetCharmsMixin">
 						<Size x="46" y="20"/>
 						<Anchors>
 							<Anchor point="RIGHT" relativeKey="$parent.closeButton" relativePoint="LEFT" x="0" y="0"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<Texture file="Interface\ICONS\ACHIEVEMENT_GUILDPERK_HONORABLEMENTION">
+								<Texture parentKey="icon" file="Interface\ICONS\ACHIEVEMENT_GUILDPERK_HONORABLEMENTION">
 									<Size x="14" y="14"/>
 									<Anchors>
 										<Anchor point="RIGHT"/>
@@ -95,29 +95,12 @@
 							</Layer>
 						</Layers>
 						<Scripts>
-							<OnLoad>
-								self:RegisterEvent("PLAYER_ENTERING_WORLD");
-								self:RegisterEvent("BAG_UPDATE_DELAYED");
-							</OnLoad>
-							<OnShow>
-								self:RegisterEvent("PLAYER_ENTERING_WORLD");
-								self:RegisterEvent("BAG_UPDATE_DELAYED");
-							</OnShow>
-							<OnHide>
-								self:UnregisterEvent("PLAYER_ENTERING_WORLD");
-								self:UnregisterEvent("BAG_UPDATE_DELAYED");
-							</OnHide>
-							<OnEvent>
-								PetBuddyFrame_UpdatePetCharms(self, event, ...);
-							</OnEvent>
-							<OnEnter>
-								GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
-								GameTooltip:SetItemByID(116415);
-								GameTooltip:Show();
-							</OnEnter>
-							<OnLeave>
-								GameTooltip:Hide();
-							</OnLeave>
+							<OnLoad method="OnShow"/>
+							<OnShow method="OnShow"/>
+							<OnHide method="OnHide"/>
+							<OnEvent method="OnEvent"/>
+							<OnEnter method="OnEnter"/>
+							<OnLeave method="OnLeave"/>
 						</Scripts>
 					</Frame>
 				</Frames>
