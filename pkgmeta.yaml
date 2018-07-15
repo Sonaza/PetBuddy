@@ -1,0 +1,6 @@
+package-as: PetBuddy
+enable-nolib-creation: no
+  
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
