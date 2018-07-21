@@ -1,3 +1,6 @@
+## 3.0.1
+* Fixed incorrect call to nonexistent function.
+
 ## 3.0.0
 * Updated for Battle for Azeroth.
 * Fixed PlaySound issue from forever ago. Oops.

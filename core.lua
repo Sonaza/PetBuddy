@@ -757,7 +757,7 @@ function PetBuddyFrame_OnShow(self)
 	addon:RefreshMedia();
 	
 	PetBuddyPetFrame_ResetAbilitySwitches();
-	PetBuddyFrame_UpdatePetCharms(PetBuddyFrameTitlePetCharms);
+	PetBuddyFrameTitlePetCharms:OnShow();
 end
 
 function PetBuddyFrame_OnHide(self)
