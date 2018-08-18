@@ -1,7 +1,7 @@
 ## Interface: 80000
 ## Title: Pet Buddy
 ## Notes: Pet Battler's buddy with HUD and items menu
-## Version: 3.0.1
+## Version: 3.0.2
 ## Author: Sonaza
 ## OptionalDeps: Ace3, BattlePetBreedID
 ## SavedVariables: PetBuddyDB

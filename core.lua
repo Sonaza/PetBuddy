@@ -591,6 +591,7 @@ PetBuddy_PetCharmsMixin = {}
 function PetBuddy_PetCharmsMixin:OnShow()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("BAG_UPDATE_DELAYED");
+	self:OnEvent();
 end
 
 function PetBuddy_PetCharmsMixin:OnHide()
@@ -615,7 +616,7 @@ end
 
 function PetBuddy_PetCharmsMixin:OnEvent(event, ...)
 	local charmsItemID, charmsNumAmount = addon:GetPetCharmsInfo();
-	if (charmsItemID and charmsNumAmount) then
+	if (charmsItemID ~= nil and charmsNumAmount ~= nil) then
 		self.text:SetText(charmsNumAmount);
 		self.icon:SetTexture(GetItemIcon(charmsItemID));
 	end

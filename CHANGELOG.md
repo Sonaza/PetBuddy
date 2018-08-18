@@ -1,3 +1,6 @@
+## 3.0.2
+* Fixed pet charms indicator.
+
 ## 3.0.1
 * Fixed incorrect call to nonexistent function.
 

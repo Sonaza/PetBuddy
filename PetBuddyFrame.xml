@@ -79,7 +79,7 @@
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<Texture parentKey="icon" file="Interface\ICONS\ACHIEVEMENT_GUILDPERK_HONORABLEMENTION">
+								<Texture parentKey="icon">
 									<Size x="14" y="14"/>
 									<Anchors>
 										<Anchor point="RIGHT"/>
